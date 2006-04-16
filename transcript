@@ -9,11 +9,9 @@
 #//  OF MENTOR GRAPHICS CORPORATION OR ITS LICENSORS
 #//  AND IS SUBJECT TO LICENSE TERMS.
 #//
-# OpenFile "C:/elektronika/dct/MDCT_EXPORT/mdct.mpf" 
+# OpenFile "C:/elektronika/dct/MDCT/mdct.mpf" 
 #Loading project mdct
-#** Error: (vlib-35) Failed to create directory "work".
-#File exists. (errno = EEXIST)
-#Modifying C:/elektronika/dct/MDCT_EXPORT/mdct.mpf
+#Modifying C:/elektronika/dct/MDCT/mdct.mpf
 #Model Technology ModelSim SE vcom 6.1a Compiler 2005.07 Jul 19 2005
 #-- Loading package standard
 #-- Loading package std_logic_1164
@@ -124,7 +122,7 @@
 #-- Loading entity clkgen
 #-- Loading entity inpimage
 #** Warning: (vlib-34) Library already exists at "work".
-#Modifying C:/elektronika/dct/MDCT_EXPORT/mdct.mpf
+#Modifying C:/elektronika/dct/MDCT/mdct.mpf
 #Model Technology ModelSim SE vcom 6.1a Compiler 2005.07 Jul 19 2005
 #-- Loading package standard
 #-- Loading package std_logic_1164

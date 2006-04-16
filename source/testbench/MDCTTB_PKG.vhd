@@ -144,7 +144,7 @@ package MDCTTB_PKG is
                           (72,92,95,98,112,100,103,99)
                           ); 
     
-    -- CANON EOS10D high quality pictures                      
+    -- CANON EOS10D super fine quality                      
     constant Q_CANON10D : I_MATRIX_TYPE := 
                           (                                           
                           (1,  1,  1,  1,  1,  1,  2,  2),
