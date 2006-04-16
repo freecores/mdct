@@ -230,28 +230,6 @@ begin
       state_reg    <= IDLE;
       cnt_reg      <= (others => '0'); 
       databuf_reg  <= (others => (others => '0')); 
-      romeaddro0    <= (others => '0');
-      romeaddro1    <= (others => '0');
-      romeaddro2    <= (others => '0');
-      romeaddro3    <= (others => '0');
-      romeaddro4    <= (others => '0');
-      romeaddro5    <= (others => '0');
-      romeaddro6    <= (others => '0');
-      romeaddro7    <= (others => '0');
-      romeaddro8    <= (others => '0');
-      romeaddro9    <= (others => '0');
-      romeaddro10   <= (others => '0');
-      romoaddro0    <= (others => '0');
-      romoaddro1    <= (others => '0');
-      romoaddro2    <= (others => '0');
-      romoaddro3    <= (others => '0');
-      romoaddro4    <= (others => '0');
-      romoaddro5    <= (others => '0');
-      romoaddro6    <= (others => '0');
-      romoaddro7    <= (others => '0');
-      romoaddro8    <= (others => '0');
-      romoaddro9    <= (others => '0');
-      romoaddro10   <= (others => '0');
       odv           <= '0';
       dcto          <= (others => '0');
       col_tmp_reg   <= (others => '0');
@@ -285,64 +263,7 @@ begin
         ----------------------
         when GET_ROM => 
             
-           odv <= '0';
-           
-           -- read precomputed MAC results from LUT
-           romeaddro0 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(0) & 
-                     databuf_reg(1)(0) &
-                     databuf_reg(2)(0) &
-                     databuf_reg(3)(0);
-           romeaddro1 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(1) & 
-                     databuf_reg(1)(1) &
-                     databuf_reg(2)(1) &
-                     databuf_reg(3)(1);
-           romeaddro2 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(2) & 
-                     databuf_reg(1)(2) &
-                     databuf_reg(2)(2) &
-                     databuf_reg(3)(2);
-           romeaddro3 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(3) & 
-                     databuf_reg(1)(3) &
-                     databuf_reg(2)(3) &
-                     databuf_reg(3)(3);          
-           romeaddro4 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(4) & 
-                     databuf_reg(1)(4) &
-                     databuf_reg(2)(4) &
-                     databuf_reg(3)(4);                    
-           romeaddro5  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(5) & 
-                     databuf_reg(1)(5) &
-                     databuf_reg(2)(5) &
-                     databuf_reg(3)(5); 
-           romeaddro6  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(6) & 
-                     databuf_reg(1)(6) &
-                     databuf_reg(2)(6) &
-                     databuf_reg(3)(6);
-           romeaddro7  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(7) & 
-                     databuf_reg(1)(7) &
-                     databuf_reg(2)(7) &
-                     databuf_reg(3)(7);
-           romeaddro8  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(8) & 
-                     databuf_reg(1)(8) &
-                     databuf_reg(2)(8) &
-                     databuf_reg(3)(8); 
-           romeaddro9  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(9) & 
-                     databuf_reg(1)(9) &
-                     databuf_reg(2)(9) &
-                     databuf_reg(3)(9);
-           romeaddro10  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(10) & 
-                     databuf_reg(1)(10) &
-                     databuf_reg(2)(10) &
-                     databuf_reg(3)(10);                                                
+           odv <= '0';                                              
                                
            state_reg <= SUM;
            
@@ -379,63 +300,7 @@ begin
           
           col_reg <= col_reg + 1;
           col_tmp_reg <= col_reg + 2;
-          
-           romoaddro0 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(0) & 
-                     databuf_reg(5)(0) &
-                     databuf_reg(6)(0) &
-                     databuf_reg(7)(0);
-           romoaddro1 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(1) & 
-                     databuf_reg(5)(1) &
-                     databuf_reg(6)(1) &
-                     databuf_reg(7)(1);
-           romoaddro2 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(2) & 
-                     databuf_reg(5)(2) &
-                     databuf_reg(6)(2) &
-                     databuf_reg(7)(2);
-           romoaddro3 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(3) & 
-                     databuf_reg(5)(3) &
-                     databuf_reg(6)(3) &
-                     databuf_reg(7)(3);                   
-           romoaddro4 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(4) & 
-                     databuf_reg(5)(4) &
-                     databuf_reg(6)(4) &
-                     databuf_reg(7)(4);
-           romoaddro5 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(5) & 
-                     databuf_reg(5)(5) &
-                     databuf_reg(6)(5) &
-                     databuf_reg(7)(5);
-           romoaddro6 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(6) & 
-                     databuf_reg(5)(6) &
-                     databuf_reg(6)(6) &
-                     databuf_reg(7)(6);
-           romoaddro7 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(7) & 
-                     databuf_reg(5)(7) &
-                     databuf_reg(6)(7) &
-                     databuf_reg(7)(7);
-           romoaddro8 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(8) & 
-                     databuf_reg(5)(8) &
-                     databuf_reg(6)(8) &
-                     databuf_reg(7)(8); 
-           romoaddro9 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(9) & 
-                     databuf_reg(5)(9) &
-                     databuf_reg(6)(9) &
-                     databuf_reg(7)(9);
-           romoaddro10 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(4)(10) & 
-                     databuf_reg(5)(10) &
-                     databuf_reg(6)(10) &
-                     databuf_reg(7)(10);
-                 
+      
           state_reg <= WRITE_ODD; 
     
         ---------------------
@@ -459,71 +324,15 @@ begin
             DA2_W)(DA2_W-1 downto 12));                            
  
           col_reg <= col_reg + 1;
+          col_tmp_reg <= col_reg + 1;
               
           -- finished processing one input row (1 x N)
           if col_reg = N - 1 then
             row_reg <= row_reg + 1;
             col_reg <= (others => '0'); 
+            col_tmp_reg <= (others => '0');
             state_reg  <= IDLE;
           else
-            
-            -- read precomputed MAC results from LUT
-            romeaddro0 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(0) & 
-                     databuf_reg(1)(0) &
-                     databuf_reg(2)(0) &
-                     databuf_reg(3)(0);
-            romeaddro1 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(1) & 
-                     databuf_reg(1)(1) &
-                     databuf_reg(2)(1) &
-                     databuf_reg(3)(1);
-            romeaddro2 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(2) & 
-                     databuf_reg(1)(2) &
-                     databuf_reg(2)(2) &
-                     databuf_reg(3)(2);
-            romeaddro3 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(3) & 
-                     databuf_reg(1)(3) &
-                     databuf_reg(2)(3) &
-                     databuf_reg(3)(3);          
-            romeaddro4 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(4) & 
-                     databuf_reg(1)(4) &
-                     databuf_reg(2)(4) &
-                     databuf_reg(3)(4);                    
-            romeaddro5  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(5) & 
-                     databuf_reg(1)(5) &
-                     databuf_reg(2)(5) &
-                     databuf_reg(3)(5); 
-            romeaddro6  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(6) & 
-                     databuf_reg(1)(6) &
-                     databuf_reg(2)(6) &
-                     databuf_reg(3)(6);
-            romeaddro7  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(7) & 
-                     databuf_reg(1)(7) &
-                     databuf_reg(2)(7) &
-                     databuf_reg(3)(7);
-            romeaddro8  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(8) & 
-                     databuf_reg(1)(8) &
-                     databuf_reg(2)(8) &
-                     databuf_reg(3)(8); 
-            romeaddro9  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(9) & 
-                     databuf_reg(1)(9) &
-                     databuf_reg(2)(9) &
-                     databuf_reg(3)(9);
-            romeaddro10  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
-                     databuf_reg(0)(10) & 
-                     databuf_reg(1)(10) &
-                     databuf_reg(2)(10) &
-                     databuf_reg(3)(10);
-          
             state_reg  <= SUM; 
           end if;
         
@@ -533,6 +342,119 @@ begin
       end case;
     end if;
   end process;		
+
+  -- read precomputed MAC results from LUT
+  romeaddro0 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(0) & 
+           databuf_reg(1)(0) &
+           databuf_reg(2)(0) &
+           databuf_reg(3)(0);
+  romeaddro1 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(1) & 
+           databuf_reg(1)(1) &
+           databuf_reg(2)(1) &
+           databuf_reg(3)(1);
+  romeaddro2 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(2) & 
+           databuf_reg(1)(2) &
+           databuf_reg(2)(2) &
+           databuf_reg(3)(2);
+  romeaddro3 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(3) & 
+           databuf_reg(1)(3) &
+           databuf_reg(2)(3) &
+           databuf_reg(3)(3);          
+  romeaddro4 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(4) & 
+           databuf_reg(1)(4) &
+           databuf_reg(2)(4) &
+           databuf_reg(3)(4);                    
+  romeaddro5  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(5) & 
+           databuf_reg(1)(5) &
+           databuf_reg(2)(5) &
+           databuf_reg(3)(5); 
+  romeaddro6  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(6) & 
+           databuf_reg(1)(6) &
+           databuf_reg(2)(6) &
+           databuf_reg(3)(6);
+  romeaddro7  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(7) & 
+           databuf_reg(1)(7) &
+           databuf_reg(2)(7) &
+           databuf_reg(3)(7);
+  romeaddro8  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(8) & 
+           databuf_reg(1)(8) &
+           databuf_reg(2)(8) &
+           databuf_reg(3)(8); 
+  romeaddro9  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(9) & 
+           databuf_reg(1)(9) &
+           databuf_reg(2)(9) &
+           databuf_reg(3)(9);
+  romeaddro10  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+           databuf_reg(0)(10) & 
+           databuf_reg(1)(10) &
+           databuf_reg(2)(10) &
+           databuf_reg(3)(10);
+  -- odd
+  romoaddro0 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(0) & 
+            databuf_reg(5)(0) &
+            databuf_reg(6)(0) &
+            databuf_reg(7)(0);
+  romoaddro1 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(1) & 
+            databuf_reg(5)(1) &
+            databuf_reg(6)(1) &
+            databuf_reg(7)(1);
+  romoaddro2 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(2) & 
+            databuf_reg(5)(2) &
+            databuf_reg(6)(2) &
+            databuf_reg(7)(2);
+  romoaddro3 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(3) & 
+            databuf_reg(5)(3) &
+            databuf_reg(6)(3) &
+            databuf_reg(7)(3);                   
+  romoaddro4 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(4) & 
+            databuf_reg(5)(4) &
+            databuf_reg(6)(4) &
+            databuf_reg(7)(4);
+  romoaddro5 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(5) & 
+            databuf_reg(5)(5) &
+            databuf_reg(6)(5) &
+            databuf_reg(7)(5);
+  romoaddro6 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(6) & 
+            databuf_reg(5)(6) &
+            databuf_reg(6)(6) &
+            databuf_reg(7)(6);
+  romoaddro7 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(7) & 
+            databuf_reg(5)(7) &
+            databuf_reg(6)(7) &
+            databuf_reg(7)(7);
+  romoaddro8 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(8) & 
+            databuf_reg(5)(8) &
+            databuf_reg(6)(8) &
+            databuf_reg(7)(8); 
+  romoaddro9 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(9) & 
+            databuf_reg(5)(9) &
+            databuf_reg(6)(9) &
+            databuf_reg(7)(9);
+  romoaddro10 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
+            databuf_reg(4)(10) & 
+            databuf_reg(5)(10) &
+            databuf_reg(6)(10) &
+            databuf_reg(7)(10);
 	
 end RTL;
 --------------------------------------------------------------------------------
