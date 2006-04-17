@@ -225,7 +225,7 @@ resolution = 1ps
 UserTimeUnit = default
 
 ; Default run length
-RunLength = 100 ns
+RunLength = 0 ps
 
 ; Maximum iterations that can be run without advancing simulation time
 IterationLimit = 5000
@@ -558,14 +558,14 @@ Project_File_11 = C:/elektronika/dct/mdct/source/ROMO.VHD
 Project_File_P_11 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder SOURCE last_compile 1144946089 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 9 dont_compile 0 cover_nosub 0 vhdl_use93 93
 Project_File_12 = C:/elektronika/dct/mdct/source/testbench/MDCTTB_PKG.vhd
 Project_File_P_12 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder TESTBENCH last_compile 1143976585 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 7 dont_compile 0 cover_nosub 0 vhdl_use93 93
-Project_File_13 = C:/elektronika/dct/mdct/source/MDCT.VHD
-Project_File_P_13 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder SOURCE last_compile 1143931873 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 0 dont_compile 0 cover_nosub 0 vhdl_use93 93
-Project_File_14 = C:/elektronika/dct/mdct/source/DCT1D.vhd
-Project_File_P_14 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder SOURCE last_compile 1145135163 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 1 dont_compile 0 cover_nosub 0 vhdl_use93 93
-Project_File_15 = C:/elektronika/dct/mdct/source/testbench/INPIMAGE.VHD
-Project_File_P_15 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder TESTBENCH last_compile 1143979283 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 5 dont_compile 0 cover_nosub 0 vhdl_use93 93
-Project_File_16 = C:/elektronika/dct/mdct/source/MDCT_PKG.vhd
-Project_File_P_16 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder SOURCE last_compile 1144447956 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 2 dont_compile 0 cover_nosub 0 vhdl_use93 93
+Project_File_13 = C:/elektronika/dct/mdct/source/DCT1D.vhd
+Project_File_P_13 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder SOURCE last_compile 1145135163 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 1 dont_compile 0 cover_nosub 0 vhdl_use93 93
+Project_File_14 = C:/elektronika/dct/mdct/source/MDCT.VHD
+Project_File_P_14 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder SOURCE last_compile 1143931873 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 0 dont_compile 0 cover_nosub 0 vhdl_use93 93
+Project_File_15 = C:/elektronika/dct/mdct/source/MDCT_PKG.vhd
+Project_File_P_15 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder SOURCE last_compile 1144447956 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 2 dont_compile 0 cover_nosub 0 vhdl_use93 93
+Project_File_16 = C:/elektronika/dct/mdct/source/testbench/INPIMAGE.VHD
+Project_File_P_16 = vhdl_novitalcheck 0 file_type vhdl group_id 0 vhdl_nodebug 0 vhdl_1164 1 vhdl_noload 0 vhdl_synth 1 vhdl_enable0In 0 folder TESTBENCH last_compile 1143979283 vhdl_disableopt 0 vhdl_vital 0 vhdl_warn1 1 vhdl_warn2 1 vhdl_explicit 1 vhdl_showsource 1 vlog_vopt {} vhdl_0InOptions {} vhdl_warn3 1 vhdl_options {} vhdl_warn4 1 ood 1 vhdl_warn5 1 compile_to work compile_order 5 dont_compile 0 cover_nosub 0 vhdl_use93 93
 Project_Sim_Count = 0
 Project_Folder_Count = 4
 Project_Folder_0 = TESTBENCH
@@ -603,6 +603,6 @@ XML_DoubleClick = Edit
 XML_CustomDoubleClick = 
 LOGFILE_DoubleClick = Edit
 LOGFILE_CustomDoubleClick = 
-EditorState = {tabbed horizontal 1} {C:/elektronika/dct/MDCT/source/testbench/MDCT_TB.DO 0 0} {C:/elektronika/dct/MDCT/source/MDCT.VHD 0 0} {C:/elektronika/dct/MDCT/source/MDCT_PKG.vhd 0 0} {C:/elektronika/dct/MDCT/source/DCT1D.vhd 0 1} {C:/elektronika/dct/MDCT/source/DCT2D.VHD 0 0} {C:/elektronika/dct/MDCT/source/testbench/MDCTTB_PKG.vhd 0 0}
+EditorState = {tabbed horizontal 1} {C:/elektronika/dct/MDCT/source/testbench/MDCT_TB.DO 0 0} {C:/elektronika/dct/MDCT/source/MDCT.VHD 0 0} {C:/elektronika/dct/MDCT/source/MDCT_PKG.vhd 0 1} {C:/elektronika/dct/MDCT/source/DCT1D.vhd 0 0} {C:/elektronika/dct/MDCT/source/DCT2D.VHD 0 0} {C:/elektronika/dct/MDCT/source/testbench/MDCTTB_PKG.vhd 0 0} {C:/elektronika/dct/MDCT/source/RAM.VHD 0 0}
 Project_Major_Version = 6
 Project_Minor_Version = 1

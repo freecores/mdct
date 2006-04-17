@@ -102,8 +102,7 @@ architecture RTL of DCT1D is
   type ISTATE_T is 
   (
     IDLE_I,
-    ACQUIRE_1ROW,
-    WAITF
+    ACQUIRE_1ROW
   );
   
   type INPUT_DATA is array (N-1 downto 0) of SIGNED(IP_W downto 0);
@@ -173,45 +172,47 @@ begin
       
         when ACQUIRE_1ROW =>
           
-          if idv = '1' then 
-            -- read next data from input FIFO
-            ready_reg  <= '1'; 
-            
-            if ready_reg = '1' then
-              -- right shift input data
-              latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
-              latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;       
+          if latch_done_reg = '0' then
+            if idv = '1' then 
+              -- read next data from input FIFO
+              ready_reg  <= '1'; 
               
-              inpcnt_reg   <= inpcnt_reg + 1;
-             
-              if inpcnt_reg = N-1 then
-                latch_done_reg <= '1';
-                ready_reg  <= '0';
-                istate_reg <= WAITF;
+              if ready_reg = '1' then
+                -- right shift input data
+                latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
+                latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;       
+                
+                inpcnt_reg   <= inpcnt_reg + 1;
+               
+                if inpcnt_reg = N-1 then
+                  latch_done_reg <= '1';
+                  ready_reg  <= '0';
+                  --istate_reg <= WAITF;
+                end if;
               end if;
-            end if;
-          else
-            ready_reg  <= '0';
-          end if; 
-
-          -- failure to allocate any memory buffer
-          if reqwrfail = '1' then
-          -- restart allocation procedure
-            istate_reg  <= IDLE_I;
-            ready_reg   <= '0';
-          end if;             
-        
-        when WAITF =>
-          -- wait until DCT1D_PROC process 1D DCT computation 
-          -- before latching new 8 input words
-          if state_reg = IDLE then
-            latch_done_reg <= '0';
-            if completed_reg = '1' then
-              istate_reg <= IDLE_I;
             else
-              istate_reg <= ACQUIRE_1ROW;
-            end if;
-          end if;    
+              ready_reg  <= '0';
+            end if; 
+  
+            -- failure to allocate any memory buffer
+            if reqwrfail = '1' then
+            -- restart allocation procedure
+              istate_reg  <= IDLE_I;
+              ready_reg   <= '0';
+            end if;             
+          else
+            -- wait until DCT1D_PROC process 1D DCT computation 
+            -- before latching new 8 input words
+            if state_reg = IDLE then
+              latch_done_reg <= '0';
+              if completed_reg = '1' then
+                istate_reg <= IDLE_I;
+              else
+                istate_reg <= ACQUIRE_1ROW;
+              end if;
+            end if; 
+          end if;
+             
         when others =>
           istate_reg <= IDLE_I;
       end case;     

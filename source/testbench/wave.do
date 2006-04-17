@@ -23,6 +23,7 @@ add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/idv
 add wave -noupdate -format Logic /tb_mdct/u_inpimage/ready
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/istate_reg
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/state_reg
+add wave -noupdate -format Logic /tb_mdct/u_mdct/u_dct1d/latch_done_reg
 add wave -noupdate -format Logic /tb_mdct/u_mdct/odv1
 add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/dcto1
 add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/u_dct1d/dcto
@@ -99,9 +100,8 @@ add wave -noupdate -format Literal /tb_mdct/u_inpimage/error_dct_matrix_s
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/error_dcto1_matrix_s
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u1_rome0/addr
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u1_rome0/datao
-add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u1_rome0/rom
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1522621 ps} 0}
+WaveRestoreCursors {{Cursor 1} {1350000 ps} 0}
 configure wave -namecolwidth 155
 configure wave -valuecolwidth 40
 configure wave -justifyvalue left
@@ -115,4 +115,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {0 ps} {4352709 ps}
+WaveRestoreZoom {619231 ps} {2120231 ps}

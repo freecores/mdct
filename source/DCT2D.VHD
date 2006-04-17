@@ -102,9 +102,7 @@ architecture RTL of DCT2D is
   type ISTATE2_T is 
   (
     IDLE_I,
-    WAIT_RAM,
-    ACQUIRE_1ROW,
-    WAITF  
+    ACQUIRE_1ROW
   );
   
   type input_data2 is array (N-1 downto 0) of SIGNED(RAMDATA_W downto 0);
@@ -168,52 +166,50 @@ begin
         ----------------------
         when ACQUIRE_1ROW =>
           
-          -- not starting from zero b/c of RAM 1T delay
-          if colram_reg /= 0 then
-            -- right shift input data
-            latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
-            latchbuf_reg(N-1)          <= RESIZE(SIGNED(ramdatao),RAMDATA_W+1);       
-          end if;  
+          if latch_done_reg = '0' then 
+            -- not starting from zero b/c of RAM 1T delay
+            if colram_reg /= 0 then
+              -- right shift input data
+              latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
+              latchbuf_reg(N-1)          <= RESIZE(SIGNED(ramdatao),RAMDATA_W+1);       
+            end if;  
+                
+            colram_reg  <= colram_reg + 1;
               
-          colram_reg  <= colram_reg + 1;
+            -- not N-1   
+            if colram_reg = N then
+              -- finished reading 64 point 1D DCT from RAM
+              if rowram_reg = N-1 then
+                -- release memory
+                releaserd_reg <= '1';
+                completed_reg <= '1';
+              end if;
+              colram_reg  <= (others => '0');    
+              rowram_reg  <= rowram_reg + 1;
+              -- 8 point input latched
+              latch_done_reg <= '1';
+              --istate_reg  <= WAITF;
+            end if;
             
-          -- not N-1   
-          if colram_reg = N then
-            -- finished reading 64 point 1D DCT from RAM
-            if rowram_reg = N-1 then
-              -- release memory
-              releaserd_reg <= '1';
-              completed_reg <= '1';
+            -- failure to allocate memory buffer
+            -- should never happen?
+            if reqrdfail = '1' then
+              istate_reg <= IDLE_I;
+            end if; 
+          else   
+            releaserd_reg <= '0';  
+            -- wait until DCT1D_PROC process 1D DCT computation 
+            -- before latching new 8 input words
+            if state_reg = IDLE then
+              latch_done_reg  <= '0';
+              if completed_reg = '1' then
+                completed_reg <= '0';
+                istate_reg    <= IDLE_I;
+              else
+                istate_reg <= ACQUIRE_1ROW;
+              end if;
             end if;
-            colram_reg  <= (others => '0');    
-            rowram_reg  <= rowram_reg + 1;
-            -- 8 point input latched
-            latch_done_reg <= '1';
-            istate_reg  <= WAITF;
-          end if;
-          
-          -- failure to allocate memory buffer
-          -- should never happen?
-          if reqrdfail = '1' then
-            istate_reg <= IDLE_I;
-          end if;                
-        
-        ----------------------
-        -- wait until latched input is processed by DCT
-        ----------------------
-        when WAITF =>
-          releaserd_reg <= '0';  
-          -- wait until DCT1D_PROC process 1D DCT computation 
-          -- before latching new 8 input words
-          if state_reg = IDLE then
-            latch_done_reg  <= '0';
-            if completed_reg = '1' then
-              completed_reg <= '0';
-              istate_reg    <= IDLE_I;
-            else
-              istate_reg <= ACQUIRE_1ROW;
-            end if;
-          end if;   
+          end if;  
            
         when others =>
           istate_reg <= IDLE_I;
