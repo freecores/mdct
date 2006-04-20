@@ -24,13 +24,13 @@ add wave -noupdate -format Logic /tb_mdct/u_inpimage/ready
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/istate_reg
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/state_reg
 add wave -noupdate -format Logic /tb_mdct/u_mdct/u_dct1d/latch_done_reg
+add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u1_rome0/datao
 add wave -noupdate -format Logic /tb_mdct/u_mdct/odv1
 add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/dcto1
-add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/u_dct1d/dcto
+add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/ramwe
 add wave -noupdate -format Literal -radix unsigned /tb_mdct/u_mdct/u_dct1d/ramwaddro
 add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/u_dct1d/ramdatai
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/error_dcto1_matrix_s
-add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/ramwe
 add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/ready_reg
 add wave -noupdate -format Literal -radix unsigned /tb_mdct/u_mdct/u_dct1d/col_reg
 add wave -noupdate -format Literal -radix unsigned /tb_mdct/u_mdct/u_dct1d/row_reg
@@ -99,9 +99,16 @@ add wave -noupdate -format Literal /tb_mdct/u_inpimage/inpimage_proc/j
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/error_dct_matrix_s
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/error_dcto1_matrix_s
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u1_rome0/addr
-add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u1_rome0/datao
+add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_romo0/datao
+add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_rome0/addr
+add wave -noupdate -format Logic /tb_mdct/u_mdct/u1_rome0/clk
+add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_rome0/datao
+add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_rome0/raddr
+add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_romo0/addr
+add wave -noupdate -format Logic /tb_mdct/u_mdct/u1_romo0/clk
+add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_romo0/raddr
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {1350000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {2168745 ps} 0}
 configure wave -namecolwidth 155
 configure wave -valuecolwidth 40
 configure wave -justifyvalue left
@@ -115,4 +122,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {619231 ps} {2120231 ps}
+WaveRestoreZoom {0 ps} {3002 ns}

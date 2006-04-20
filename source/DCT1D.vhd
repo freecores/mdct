@@ -93,6 +93,7 @@ architecture RTL of DCT1D is
 
   type STATE_T is 
   (
+    MEMREQ,
     IDLE,
     GET_ROM,
     SUM,
@@ -101,7 +102,6 @@ architecture RTL of DCT1D is
   
   type ISTATE_T is 
   (
-    IDLE_I,
     ACQUIRE_1ROW
   );
   
@@ -121,7 +121,6 @@ architecture RTL of DCT1D is
   signal latch_done_reg : STD_LOGIC;	
   signal requestwr_reg  : STD_LOGIC;	
   signal releasewr_reg  : STD_LOGIC;
-  signal completed_reg  : STD_LOGIC;
   signal col_tmp_reg    : UNSIGNED(RAMADRR_W/2-1 downto 0);    
 begin
   
@@ -154,68 +153,38 @@ begin
       inpcnt_reg     <= (others => '0'); 
       ready_reg      <= '0'; 
       latchbuf_reg   <= (others => (others => '0'));
-      istate_reg     <= IDLE_I; 
       latch_done_reg <= '0';
-      requestwr_reg  <= '0';
     elsif clk = '1' and clk'event then
 
-      case istate_reg is
+      if latch_done_reg = '0' or 
+         (state_reg = IDLE and reqwrfail = '0') then
+         
+        -- wait until DCT1D_PROC process 1D DCT computation 
+        -- before latching new 8 input words
+        if state_reg = IDLE and reqwrfail = '0' then
+          latch_done_reg <= '0';
+        end if;
         
-        when IDLE_I =>
-          if idv = '1' then
-            requestwr_reg <= '1';
-          end if;
-          if requestwr_reg = '1' then
-            requestwr_reg <= '0';
-            istate_reg <= ACQUIRE_1ROW;
-          end if;    
-      
-        when ACQUIRE_1ROW =>
+        if idv = '1' then 
+          -- read next data from input FIFO
+          ready_reg  <= '1'; 
           
-          if latch_done_reg = '0' then
-            if idv = '1' then 
-              -- read next data from input FIFO
-              ready_reg  <= '1'; 
-              
-              if ready_reg = '1' then
-                -- right shift input data
-                latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
-                latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;       
-                
-                inpcnt_reg   <= inpcnt_reg + 1;
-               
-                if inpcnt_reg = N-1 then
-                  latch_done_reg <= '1';
-                  ready_reg  <= '0';
-                  --istate_reg <= WAITF;
-                end if;
-              end if;
-            else
+          if ready_reg = '1' then
+            -- right shift input data
+            latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
+            latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;       
+            
+            inpcnt_reg   <= inpcnt_reg + 1;
+           
+            if inpcnt_reg = N-1 then
+              latch_done_reg <= '1';
               ready_reg  <= '0';
-            end if; 
-  
-            -- failure to allocate any memory buffer
-            if reqwrfail = '1' then
-            -- restart allocation procedure
-              istate_reg  <= IDLE_I;
-              ready_reg   <= '0';
-            end if;             
-          else
-            -- wait until DCT1D_PROC process 1D DCT computation 
-            -- before latching new 8 input words
-            if state_reg = IDLE then
-              latch_done_reg <= '0';
-              if completed_reg = '1' then
-                istate_reg <= IDLE_I;
-              else
-                istate_reg <= ACQUIRE_1ROW;
-              end if;
-            end if; 
+            end if;
           end if;
-             
-        when others =>
-          istate_reg <= IDLE_I;
-      end case;     
+        else
+          ready_reg  <= '0';
+        end if;             
+      end if;     
     end if;  
   end process;
   
@@ -227,30 +196,49 @@ begin
     if rst = '1' then
       col_reg       <= (others => '0');
       row_reg       <= (others => '0');  
-      state_reg     <= IDLE;
+      state_reg     <= MEMREQ;
       cnt_reg       <= (others => '0'); 
       databuf_reg   <= (others => (others => '0')); 
       ramwaddro     <= (others => '0');
       ramdatai_s    <= (others => '0');
       ramwe_s       <= '0'; 
       releasewr_reg <= '0';
-      completed_reg <= '0';
       col_tmp_reg   <= (others => '0');
+      requestwr_reg <= '0';
     elsif rising_edge(clk) then	
       
       case state_reg is
         
+        when MEMREQ =>
+        
+          ramwe_s       <= '0'; 
+          
+          -- release memory fully written
+          releasewr_reg <= '0'; 
+          
+          -- request free memory for writing
+          requestwr_reg <= '1';
+          
+          -- DBUFCTL 1T delay
+          if requestwr_reg = '1' then
+            requestwr_reg <= '0';
+            state_reg <= IDLE;
+          end if; 
+
         ----------------------
         -- wait for input data
         ----------------------
         when IDLE =>
-            
-          releasewr_reg <= '0';  
+
           ramwe_s       <= '0'; 
+          
+          -- failure to allocate any memory buffer
+          if reqwrfail = '1' then
+             -- restart allocation procedure
+             state_reg  <= MEMREQ;
           -- wait until 8 input words are latched in latchbuf_reg
           -- by GET_PROC                    
-          if latch_done_reg = '1' then
-            completed_reg   <= '0';
+          elsif latch_done_reg = '1' then
             -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
             databuf_reg(0)  <= latchbuf_reg(0)+latchbuf_reg(7);
             databuf_reg(1)  <= latchbuf_reg(1)+latchbuf_reg(6);
@@ -260,16 +248,16 @@ begin
             databuf_reg(5)  <= latchbuf_reg(1)-latchbuf_reg(6);
             databuf_reg(6)  <= latchbuf_reg(2)-latchbuf_reg(5);
             databuf_reg(7)  <= latchbuf_reg(3)-latchbuf_reg(4);
-            state_reg   <= GET_ROM;
-          end if;    
+            state_reg       <= GET_ROM;
+          end if; 
 
         ----------------------
         -- get MAC results from ROM even and ROM odd memories
         ----------------------
         when GET_ROM => 
             
-           ramwe_s   <='0';   
-                     
+           ramwe_s   <='0'; 
+         
            state_reg <= SUM;
            
         ---------------------
@@ -336,13 +324,12 @@ begin
             col_tmp_reg     <= (others => '0');   
             if row_reg = N - 1 then
               releasewr_reg <= '1';
-              completed_reg <= '1';
+              state_reg     <= MEMREQ;
+            else
+              state_reg     <= IDLE;
             end if;
-            state_reg  <= IDLE;
-          else
-         
-            state_reg <= SUM;
-
+          else       
+            state_reg       <= SUM;
           end if;
         --------------------------------
         -- OTHERS
