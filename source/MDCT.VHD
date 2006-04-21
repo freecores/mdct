@@ -189,7 +189,8 @@ end component;
 ------------------------------
 component ROME 
   port( 
-       addr         : in  STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);  
+       addr         : in  STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
+       clk          : in STD_LOGIC;  
        
        datao        : out STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0) 
   );
@@ -200,7 +201,8 @@ end component;
 ------------------------------
 component ROMO 
   port( 
-       addr         : in  STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);  
+       addr         : in  STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0); 
+       clk          : in STD_LOGIC; 
        
        datao        : out STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0) 
   );
@@ -508,7 +510,8 @@ U_DBUFCTL : DBUFCTL
 ------------------------------
 U1_ROME0 : ROME 
   port map( 
-       addr        => romeaddro0_s,   
+       addr        => romeaddro0_s,  
+       clk         => clk, 
        
        datao       => romedatao0_s
   );
@@ -519,6 +522,7 @@ U1_ROME0 : ROME
 U1_ROME1 : ROME 
   port map( 
        addr        => romeaddro1_s,   
+       clk         => clk, 
        
        datao       => romedatao1_s
   );
@@ -528,7 +532,8 @@ U1_ROME1 : ROME
 ------------------------------
 U1_ROME2 : ROME 
   port map( 
-       addr        => romeaddro2_s,   
+       addr        => romeaddro2_s,
+       clk         => clk,    
        
        datao       => romedatao2_s
   ); 
@@ -538,7 +543,8 @@ U1_ROME2 : ROME
 ------------------------------
 U1_ROME3 : ROME 
   port map( 
-       addr        => romeaddro3_s,   
+       addr        => romeaddro3_s,
+       clk         => clk,    
        
        datao       => romedatao3_s
   ); 
@@ -547,7 +553,8 @@ U1_ROME3 : ROME
 ------------------------------
 U1_ROME4 : ROME 
   port map( 
-       addr        => romeaddro4_s,   
+       addr        => romeaddro4_s, 
+       clk         => clk,   
        
        datao       => romedatao4_s
   ); 
@@ -556,7 +563,8 @@ U1_ROME4 : ROME
 ------------------------------
 U1_ROME5 : ROME 
   port map( 
-       addr        => romeaddro5_s,   
+       addr        => romeaddro5_s, 
+       clk         => clk,   
        
        datao       => romedatao5_s
   ); 
@@ -565,7 +573,8 @@ U1_ROME5 : ROME
 ------------------------------
 U1_ROME6 : ROME 
   port map( 
-       addr        => romeaddro6_s,   
+       addr        => romeaddro6_s, 
+       clk         => clk,   
        
        datao       => romedatao6_s
   ); 
@@ -574,7 +583,8 @@ U1_ROME6 : ROME
 ------------------------------
 U1_ROME7 : ROME 
   port map( 
-       addr        => romeaddro7_s,   
+       addr        => romeaddro7_s, 
+       clk         => clk,   
        
        datao       => romedatao7_s
   ); 
@@ -583,7 +593,8 @@ U1_ROME7 : ROME
 ------------------------------
 U1_ROME8 : ROME 
   port map( 
-       addr        => romeaddro8_s,   
+       addr        => romeaddro8_s, 
+       clk         => clk,   
        
        datao       => romedatao8_s
   ); 
@@ -593,7 +604,8 @@ U1_ROME8 : ROME
 ------------------------------
 U1_ROMO0 : ROMO 
   port map( 
-       addr        => romoaddro0_s,   
+       addr        => romoaddro0_s, 
+       clk         => clk,  
        
        datao       => romodatao0_s
   );
@@ -602,7 +614,8 @@ U1_ROMO0 : ROMO
 ------------------------------
 U1_ROMO1 : ROMO 
   port map( 
-       addr        => romoaddro1_s,   
+       addr        => romoaddro1_s,
+       clk         => clk,   
        
        datao       => romodatao1_s
   );
@@ -611,7 +624,8 @@ U1_ROMO1 : ROMO
 ------------------------------
 U1_ROMO2 : ROMO 
   port map( 
-       addr        => romoaddro2_s,   
+       addr        => romoaddro2_s,
+       clk         => clk,   
        
        datao       => romodatao2_s
   );
@@ -620,7 +634,8 @@ U1_ROMO2 : ROMO
 ------------------------------
 U1_ROMO3 : ROMO 
   port map( 
-       addr        => romoaddro3_s,   
+       addr        => romoaddro3_s, 
+       clk         => clk,  
        
        datao       => romodatao3_s
   );
@@ -630,6 +645,7 @@ U1_ROMO3 : ROMO
 U1_ROMO4 : ROMO 
   port map( 
        addr        => romoaddro4_s,   
+       clk         => clk,
        
        datao       => romodatao4_s
   );
@@ -638,7 +654,8 @@ U1_ROMO4 : ROMO
 ------------------------------
 U1_ROMO5 : ROMO 
   port map( 
-       addr        => romoaddro5_s,   
+       addr        => romoaddro5_s, 
+       clk         => clk,  
        
        datao       => romodatao5_s
   );
@@ -647,7 +664,8 @@ U1_ROMO5 : ROMO
 ------------------------------
 U1_ROMO6 : ROMO 
   port map( 
-       addr        => romoaddro6_s,   
+       addr        => romoaddro6_s,
+       clk         => clk,   
        
        datao       => romodatao6_s
   );
@@ -656,7 +674,8 @@ U1_ROMO6 : ROMO
 ------------------------------
 U1_ROMO7 : ROMO 
   port map( 
-       addr        => romoaddro7_s,   
+       addr        => romoaddro7_s,
+       clk         => clk,   
        
        datao       => romodatao7_s
   );
@@ -665,7 +684,8 @@ U1_ROMO7 : ROMO
 ------------------------------
 U1_ROMO8 : ROMO 
   port map( 
-       addr        => romoaddro8_s,   
+       addr        => romoaddro8_s, 
+       clk         => clk,  
        
        datao       => romodatao8_s
   );
@@ -678,7 +698,8 @@ U1_ROMO8 : ROMO
 ------------------------------
 U2_ROME0 : ROME 
   port map( 
-       addr        => rome2addro0_s,   
+       addr        => rome2addro0_s, 
+       clk         => clk,   
        
        datao       => rome2datao0_s
   );
@@ -688,7 +709,8 @@ U2_ROME0 : ROME
 ------------------------------
 U2_ROME1 : ROME 
   port map( 
-       addr        => rome2addro1_s,   
+       addr        => rome2addro1_s,
+       clk         => clk,    
        
        datao       => rome2datao1_s
   );
@@ -698,7 +720,8 @@ U2_ROME1 : ROME
 ------------------------------
 U2_ROME2 : ROME 
   port map( 
-       addr        => rome2addro2_s,   
+       addr        => rome2addro2_s, 
+       clk         => clk,   
        
        datao       => rome2datao2_s
   ); 
@@ -708,7 +731,8 @@ U2_ROME2 : ROME
 ------------------------------
 U2_ROME3 : ROME 
   port map( 
-       addr        => rome2addro3_s,   
+       addr        => rome2addro3_s, 
+       clk         => clk,   
        
        datao       => rome2datao3_s
   ); 
@@ -717,7 +741,8 @@ U2_ROME3 : ROME
 ------------------------------
 U2_ROME4 : ROME 
   port map( 
-       addr        => rome2addro4_s,   
+       addr        => rome2addro4_s,  
+       clk         => clk,  
        
        datao       => rome2datao4_s
   ); 
@@ -726,7 +751,8 @@ U2_ROME4 : ROME
 ------------------------------
 U2_ROME5 : ROME 
   port map( 
-       addr        => rome2addro5_s,   
+       addr        => rome2addro5_s, 
+       clk         => clk,   
        
        datao       => rome2datao5_s
   ); 
@@ -735,7 +761,8 @@ U2_ROME5 : ROME
 ------------------------------
 U2_ROME6 : ROME 
   port map( 
-       addr        => rome2addro6_s,   
+       addr        => rome2addro6_s, 
+       clk         => clk,   
        
        datao       => rome2datao6_s
   ); 
@@ -744,7 +771,8 @@ U2_ROME6 : ROME
 ------------------------------
 U2_ROME7 : ROME 
   port map( 
-       addr        => rome2addro7_s,   
+       addr        => rome2addro7_s, 
+       clk         => clk,   
        
        datao       => rome2datao7_s
   ); 
@@ -753,7 +781,8 @@ U2_ROME7 : ROME
 ------------------------------
 U2_ROME8 : ROME 
   port map( 
-       addr        => rome2addro8_s,   
+       addr        => rome2addro8_s, 
+       clk         => clk,   
        
        datao       => rome2datao8_s
   );
@@ -762,7 +791,8 @@ U2_ROME8 : ROME
 ------------------------------
 U2_ROME9 : ROME 
   port map( 
-       addr        => rome2addro9_s,   
+       addr        => rome2addro9_s, 
+       clk         => clk,   
        
        datao       => rome2datao9_s
   );  
@@ -771,7 +801,8 @@ U2_ROME9 : ROME
 ------------------------------
 U2_ROME10 : ROME 
   port map( 
-       addr        => rome2addro10_s,   
+       addr        => rome2addro10_s, 
+       clk         => clk,   
        
        datao       => rome2datao10_s
   );
@@ -781,7 +812,8 @@ U2_ROME10 : ROME
 ------------------------------
 U2_ROMO0 : ROMO 
   port map( 
-       addr        => romo2addro0_s,   
+       addr        => romo2addro0_s,
+       clk         => clk, 
        
        datao       => romo2datao0_s
   );
@@ -790,7 +822,8 @@ U2_ROMO0 : ROMO
 ------------------------------
 U2_ROMO1 : ROMO 
   port map( 
-       addr        => romo2addro1_s,   
+       addr        => romo2addro1_s,
+       clk         => clk,   
        
        datao       => romo2datao1_s
   );
@@ -799,7 +832,8 @@ U2_ROMO1 : ROMO
 ------------------------------
 U2_ROMO2 : ROMO 
   port map( 
-       addr        => romo2addro2_s,   
+       addr        => romo2addro2_s, 
+       clk         => clk,  
        
        datao       => romo2datao2_s
   );
@@ -808,7 +842,8 @@ U2_ROMO2 : ROMO
 ------------------------------
 U2_ROMO3 : ROMO 
   port map( 
-       addr        => romo2addro3_s,   
+       addr        => romo2addro3_s, 
+       clk         => clk,  
        
        datao       => romo2datao3_s
   );
@@ -817,7 +852,8 @@ U2_ROMO3 : ROMO
 ------------------------------
 U2_ROMO4 : ROMO 
   port map( 
-       addr        => romo2addro4_s,   
+       addr        => romo2addro4_s, 
+       clk         => clk,  
        
        datao       => romo2datao4_s
   );
@@ -826,7 +862,8 @@ U2_ROMO4 : ROMO
 ------------------------------
 U2_ROMO5 : ROMO 
   port map( 
-       addr        => romo2addro5_s,   
+       addr        => romo2addro5_s, 
+       clk         => clk,  
        
        datao       => romo2datao5_s
   );
@@ -835,7 +872,8 @@ U2_ROMO5 : ROMO
 ------------------------------
 U2_ROMO6 : ROMO 
   port map( 
-       addr        => romo2addro6_s,   
+       addr        => romo2addro6_s,
+       clk         => clk,   
        
        datao       => romo2datao6_s
   );
@@ -844,7 +882,8 @@ U2_ROMO6 : ROMO
 ------------------------------
 U2_ROMO7 : ROMO 
   port map( 
-       addr        => romo2addro7_s,   
+       addr        => romo2addro7_s, 
+       clk         => clk,  
        
        datao       => romo2datao7_s
   );
@@ -853,7 +892,8 @@ U2_ROMO7 : ROMO
 ------------------------------
 U2_ROMO8 : ROMO 
   port map( 
-       addr        => romo2addro8_s,   
+       addr        => romo2addro8_s, 
+       clk         => clk,  
        
        datao       => romo2datao8_s
   );	
@@ -862,7 +902,8 @@ U2_ROMO8 : ROMO
 ------------------------------
 U2_ROMO9 : ROMO 
   port map( 
-       addr        => romo2addro9_s,   
+       addr        => romo2addro9_s,
+       clk         => clk,   
        
        datao       => romo2datao9_s
   );	  			
@@ -871,7 +912,8 @@ U2_ROMO9 : ROMO
 ------------------------------
 U2_ROMO10 : ROMO 
   port map( 
-       addr        => romo2addro10_s,   
+       addr        => romo2addro10_s,
+       clk         => clk,   
        
        datao       => romo2datao10_s
   );

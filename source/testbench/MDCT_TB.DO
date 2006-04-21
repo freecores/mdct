@@ -21,11 +21,21 @@
 #------------------------------------------------------------------------------
 
 
+#set ROM_MODEL XILINX
+set ROM_MODEL GENERIC
+
 vlib work
 vmap work work
 vcom SOURCE/MDCT_PKG.vhd
-vcom SOURCE/ROME.VHD
-vcom SOURCE/ROMO.VHD
+if {$ROM_MODEL=="XILINX"} {
+  vcom SOURCE/XILINX/ROME_XIL.VHD
+  vcom SOURCE/XILINX/ROME.VHD
+  vcom SOURCE/XILINX/ROMO_XIL.VHD
+  vcom SOURCE/XILINX/ROMO.VHD 
+} else {
+  vcom SOURCE/ROME.VHD
+  vcom SOURCE/ROMO.VHD
+}
 vcom SOURCE/RAM.VHD
 vcom SOURCE/DCT1D.VHD
 vcom SOURCE/DCT2D.VHD

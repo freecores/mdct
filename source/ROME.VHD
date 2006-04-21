@@ -31,7 +31,8 @@ library IEEE;
 
 entity ROME is 
   port( 
-       addr         : in  STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);  
+       addr         : in  STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0); 
+       clk          : in  STD_LOGIC; 
        
        datao        : out STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0) 
   );         
@@ -115,15 +116,18 @@ architecture RTL of ROME is
      std_logic_vector( CP ),         
      (others => '0')
      );                
-  
+  signal addr_reg : STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);  
    
 begin 
 
-  process( addr )
-  begin
-    datao <= rom( TO_INTEGER(UNSIGNED(addr)) ); 
-  end process;
+  datao <= rom( TO_INTEGER(UNSIGNED(addr_reg)) ); 
   
+  process(clk)
+  begin
+   if clk = '1' and clk'event then
+     addr_reg <= addr;
+   end if;
+  end process;  
       
 end RTL;    
 --------------------------------------------------------------------------------          
