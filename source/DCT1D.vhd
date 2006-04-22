@@ -119,6 +119,7 @@ architecture RTL of DCT1D is
   signal ramdatai_s     : STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
   signal ramwe_s        : STD_LOGIC;
   signal latch_done_reg : STD_LOGIC;	
+  signal latch_done_prev_reg : STD_LOGIC;
   signal requestwr_reg  : STD_LOGIC;	
   signal releasewr_reg  : STD_LOGIC;
   signal col_tmp_reg    : UNSIGNED(RAMADRR_W/2-1 downto 0);    
@@ -154,14 +155,18 @@ begin
       ready_reg      <= '0'; 
       latchbuf_reg   <= (others => (others => '0'));
       latch_done_reg <= '0';
+      databuf_reg   <= (others => (others => '0')); 
+      --latch_done_prev_reg <= '0';
     elsif clk = '1' and clk'event then
+    
+      --latch_done_prev_reg <= latch_done_reg;
 
       if latch_done_reg = '0' or 
-         (state_reg = IDLE and reqwrfail = '0') then
+         (state_reg=IDLE and reqwrfail='0' and latch_done_reg = '1') then
          
         -- wait until DCT1D_PROC process 1D DCT computation 
         -- before latching new 8 input words
-        if state_reg = IDLE and reqwrfail = '0' then
+        if (state_reg = IDLE and reqwrfail = '0' and latch_done_reg = '1') then
           latch_done_reg <= '0';
         end if;
         
@@ -179,6 +184,15 @@ begin
             if inpcnt_reg = N-1 then
               latch_done_reg <= '1';
               ready_reg  <= '0';
+              -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
+              databuf_reg(0)  <= latchbuf_reg(1)+(SIGNED('0' & dcti) - LEVEL_SHIFT);
+              databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
+              databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
+              databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
+              databuf_reg(4)  <= latchbuf_reg(1)-(SIGNED('0' & dcti) - LEVEL_SHIFT);
+              databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
+              databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
+              databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
             end if;
           end if;
         else
@@ -198,7 +212,7 @@ begin
       row_reg       <= (others => '0');  
       state_reg     <= MEMREQ;
       cnt_reg       <= (others => '0'); 
-      databuf_reg   <= (others => (others => '0')); 
+      
       ramwaddro     <= (others => '0');
       ramdatai_s    <= (others => '0');
       ramwe_s       <= '0'; 
@@ -239,16 +253,7 @@ begin
           -- wait until 8 input words are latched in latchbuf_reg
           -- by GET_PROC                    
           elsif latch_done_reg = '1' then
-            -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
-            databuf_reg(0)  <= latchbuf_reg(0)+latchbuf_reg(7);
-            databuf_reg(1)  <= latchbuf_reg(1)+latchbuf_reg(6);
-            databuf_reg(2)  <= latchbuf_reg(2)+latchbuf_reg(5);
-            databuf_reg(3)  <= latchbuf_reg(3)+latchbuf_reg(4);
-            databuf_reg(4)  <= latchbuf_reg(0)-latchbuf_reg(7);
-            databuf_reg(5)  <= latchbuf_reg(1)-latchbuf_reg(6);
-            databuf_reg(6)  <= latchbuf_reg(2)-latchbuf_reg(5);
-            databuf_reg(7)  <= latchbuf_reg(3)-latchbuf_reg(4);
-            state_reg       <= GET_ROM;
+            state_reg       <= SUM;
           end if; 
 
         ----------------------
@@ -275,7 +280,8 @@ begin
             (RESIZE(SIGNED(romedatao5),DA_W-5) & "00000") +
             (RESIZE(SIGNED(romedatao6),DA_W-6) & "000000") + 
             (RESIZE(SIGNED(romedatao7),DA_W-7) & "0000000") -
-            (RESIZE(SIGNED(romedatao8),DA_W-8) & "00000000"),DA_W)(DA_W-1 downto 12));
+            (RESIZE(SIGNED(romedatao8),DA_W-8) & "00000000"),
+                                        DA_W)(DA_W-1 downto 12));
          
           -- write even part
           ramwe_s   <= '1';

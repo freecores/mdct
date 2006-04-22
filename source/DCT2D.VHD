@@ -144,6 +144,7 @@ begin
       completed_reg  <= '0';
       requestrd_reg  <= '0';
       releaserd_reg  <= '0';
+      databuf_reg  <= (others => (others => '0'));
     elsif clk = '1' and clk'event then
       case istate_reg is
       
@@ -151,7 +152,7 @@ begin
         -- IDLE
         ----------------------
         when IDLE_I =>
-          -- one of ram buffers has new data
+          -- one of ram buffers has new data, process it
           if dataready = '1' then
             requestrd_reg <= '1';
           end if;
@@ -159,6 +160,8 @@ begin
           if requestrd_reg = '1' then
             requestrd_reg <= '0';
             istate_reg <= ACQUIRE_1ROW;
+            -- to account for 1T RAM delay, increment RAM address counter
+            colram_reg <= (0=>'1',others => '0');
           end if;      
         
         ----------------------
@@ -184,11 +187,19 @@ begin
                 releaserd_reg <= '1';
                 completed_reg <= '1';
               end if;
-              colram_reg  <= (others => '0');    
+              colram_reg  <= ( others => '0');    
               rowram_reg  <= rowram_reg + 1;
               -- 8 point input latched
               latch_done_reg <= '1';
-              --istate_reg  <= WAITF;
+              -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
+              databuf_reg(0)  <= latchbuf_reg(1)+RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
+              databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
+              databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
+              databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
+              databuf_reg(4)  <= latchbuf_reg(1)-RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
+              databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
+              databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
+              databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
             end if;
             
             -- failure to allocate memory buffer
@@ -204,9 +215,12 @@ begin
               latch_done_reg  <= '0';
               if completed_reg = '1' then
                 completed_reg <= '0';
+                colram_reg    <= (others => '0');
                 istate_reg    <= IDLE_I;
               else
                 istate_reg <= ACQUIRE_1ROW;
+                -- to account for 1T RAM delay, increment RAM address counter
+                colram_reg <= (0=>'1',others => '0');
               end if;
             end if;
           end if;  
@@ -225,7 +239,6 @@ begin
       row_reg      <= (others => '0');  
       state_reg    <= IDLE;
       cnt_reg      <= (others => '0'); 
-      databuf_reg  <= (others => (others => '0')); 
       odv           <= '0';
       dcto          <= (others => '0');
       col_tmp_reg   <= (others => '0');
@@ -242,16 +255,8 @@ begin
           -- wait until 8 input words are latched in latchbuf_reg
           -- by GET_PROC                    
           if latch_done_reg = '1' then
-            -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
-            databuf_reg(0)  <= latchbuf_reg(0)+latchbuf_reg(7);
-            databuf_reg(1)  <= latchbuf_reg(1)+latchbuf_reg(6);
-            databuf_reg(2)  <= latchbuf_reg(2)+latchbuf_reg(5);
-            databuf_reg(3)  <= latchbuf_reg(3)+latchbuf_reg(4);
-            databuf_reg(4)  <= latchbuf_reg(0)-latchbuf_reg(7);
-            databuf_reg(5)  <= latchbuf_reg(1)-latchbuf_reg(6);
-            databuf_reg(6)  <= latchbuf_reg(2)-latchbuf_reg(5);
-            databuf_reg(7)  <= latchbuf_reg(3)-latchbuf_reg(4);
-            state_reg   <= GET_ROM;
+            
+            state_reg   <= SUM;
           end if;    
 
         ----------------------
