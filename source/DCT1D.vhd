@@ -55,9 +55,7 @@ entity DCT1D is
       romodatao6   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       romodatao7   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       romodatao8   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
-      reqwrfail    : in STD_LOGIC;
 
-      ready        : out STD_LOGIC; -- read from FIFO
       odv          : out STD_LOGIC;
       dcto         : out std_logic_vector(OP_W-1 downto 0);
       romeaddro0   : out STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
@@ -81,8 +79,7 @@ entity DCT1D is
       ramwaddro    : out STD_LOGIC_VECTOR(RAMADRR_W-1 downto 0);
       ramdatai     : out STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
       ramwe        : out STD_LOGIC;
-      requestwr    : out STD_LOGIC;
-      releasewr    : out STD_LOGIC		
+      wmemsel      : out STD_LOGIC		
 		);
 end DCT1D;
 
@@ -90,43 +87,22 @@ end DCT1D;
 -- ARCHITECTURE
 --------------------------------------------------------------------------------
 architecture RTL of DCT1D is   
-
-  type STATE_T is 
-  (
-    MEMREQ,
-    IDLE,
-    GET_ROM,
-    SUM,
-    WRITE_ODD
-  );
-  
-  type ISTATE_T is 
-  (
-    ACQUIRE_1ROW
-  );
   
   type INPUT_DATA is array (N-1 downto 0) of SIGNED(IP_W downto 0);
   
-  signal ready_reg      : STD_LOGIC;
   signal databuf_reg    : INPUT_DATA;
   signal latchbuf_reg   : INPUT_DATA;
   signal col_reg        : UNSIGNED(RAMADRR_W/2-1 downto 0);
   signal row_reg        : UNSIGNED(RAMADRR_W/2-1 downto 0);
-  signal inpcnt_reg     : UNSIGNED(2 downto 0);
-  signal state_reg      : STATE_T;
-  signal istate_reg     : ISTATE_T;
-  signal cnt_reg        : UNSIGNED(3 downto 0);
+  signal rowr_reg       : UNSIGNED(RAMADRR_W/2-1 downto 0);
+  signal inpcnt_reg     : UNSIGNED(RAMADRR_W/2-1 downto 0);
   signal ramdatai_s     : STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
   signal ramwe_s        : STD_LOGIC;
-  signal latch_done_reg : STD_LOGIC;	
-  signal latch_done_prev_reg : STD_LOGIC;
-  signal requestwr_reg  : STD_LOGIC;	
-  signal releasewr_reg  : STD_LOGIC;
-  signal col_tmp_reg    : UNSIGNED(RAMADRR_W/2-1 downto 0);    
+  signal wmemsel_reg    : STD_LOGIC;	
+  signal stage2_reg     : STD_LOGIC; 
+  signal stage2_cnt_reg : UNSIGNED(RAMADRR_W-1 downto 0); 
+  signal col_2_reg      : UNSIGNED(RAMADRR_W/2-1 downto 0); 
 begin
-  
-  ready_sg:  
-  ready    <= ready_reg;
   
   ramwe_sg:
   ramwe    <= ramwe_s;
@@ -140,137 +116,61 @@ begin
   dcto_sg:
   dcto     <= ramdatai_s(RAMDATA_W-1) & ramdatai_s(RAMDATA_W-1) & ramdatai_s;
   
-  releasewr_sg:
-  releasewr <= releasewr_reg;
-  requestwr_sg:
-  requestwr <= requestwr_reg;
-  
-  --------------------------------------
-  -- PROCESS
-  --------------------------------------
-  GET_PROC : process(rst,clk)
-  begin
-    if rst = '1' then   
-      inpcnt_reg     <= (others => '0'); 
-      ready_reg      <= '0'; 
-      latchbuf_reg   <= (others => (others => '0'));
-      latch_done_reg <= '0';
-      databuf_reg   <= (others => (others => '0')); 
-      --latch_done_prev_reg <= '0';
-    elsif clk = '1' and clk'event then
-    
-      --latch_done_prev_reg <= latch_done_reg;
-
-      if latch_done_reg = '0' or 
-         (state_reg=IDLE and reqwrfail='0' and latch_done_reg = '1') then
-         
-        -- wait until DCT1D_PROC process 1D DCT computation 
-        -- before latching new 8 input words
-        if (state_reg = IDLE and reqwrfail = '0' and latch_done_reg = '1') then
-          latch_done_reg <= '0';
-        end if;
-        
-        if idv = '1' then 
-          -- read next data from input FIFO
-          ready_reg  <= '1'; 
-          
-          if ready_reg = '1' then
-            -- right shift input data
-            latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
-            latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;       
-            
-            inpcnt_reg   <= inpcnt_reg + 1;
-           
-            if inpcnt_reg = N-1 then
-              latch_done_reg <= '1';
-              ready_reg  <= '0';
-              -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
-              databuf_reg(0)  <= latchbuf_reg(1)+(SIGNED('0' & dcti) - LEVEL_SHIFT);
-              databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
-              databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
-              databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
-              databuf_reg(4)  <= latchbuf_reg(1)-(SIGNED('0' & dcti) - LEVEL_SHIFT);
-              databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
-              databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
-              databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
-            end if;
-          end if;
-        else
-          ready_reg  <= '0';
-        end if;             
-      end if;     
-    end if;  
-  end process;
-  
-  --------------------------------------
-  -- PROCESS
-  --------------------------------------
-  DCT1D_PROC: process(rst, clk)
+  wmemsel_sg:
+  wmemsel <= wmemsel_reg;
+ 
+  process(clk,rst)
   begin
     if rst = '1' then
-      col_reg       <= (others => '0');
-      row_reg       <= (others => '0');  
-      state_reg     <= MEMREQ;
-      cnt_reg       <= (others => '0'); 
+      inpcnt_reg     <= (others => '0');
+      latchbuf_reg   <= (others => (others => '0')); 
+      databuf_reg    <= (others => (others => '0'));
+      stage2_reg     <= '0';
+      stage2_cnt_reg <= (others => '1');
+      ramdatai_s     <= (others => '0');
+      ramwe_s        <= '0';
+      ramwaddro      <= (others => '0');
+      col_reg        <= (others => '0');
+      row_reg        <= (others => '0');
+      wmemsel_reg    <= '0';
+      col_2_reg      <= (others => '0');
+    elsif clk = '1' and clk'event then
+
+      stage2_reg     <= '0';
+      ramwe_s        <= '0';
+ 
+      --------------------------------
+      -- 1st stage
+      --------------------------------
+      if idv = '1' then
       
-      ramwaddro     <= (others => '0');
-      ramdatai_s    <= (others => '0');
-      ramwe_s       <= '0'; 
-      releasewr_reg <= '0';
-      col_tmp_reg   <= (others => '0');
-      requestwr_reg <= '0';
-    elsif rising_edge(clk) then	
+        inpcnt_reg    <= inpcnt_reg + 1;
+
+        -- right shift input data
+        latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
+        latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;
+
+        if inpcnt_reg = N-1 then
+          -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
+          databuf_reg(0)  <= latchbuf_reg(1)+(SIGNED('0' & dcti) - LEVEL_SHIFT);
+          databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
+          databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
+          databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
+          databuf_reg(4)  <= latchbuf_reg(1)-(SIGNED('0' & dcti) - LEVEL_SHIFT);
+          databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
+          databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
+          databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
+          stage2_reg      <= '1';
+        end if;
+      end if;
+      --------------------------------
       
-      case state_reg is
+      --------------------------------
+      -- 2nd stage
+      --------------------------------
+      if stage2_cnt_reg < N then
         
-        when MEMREQ =>
-        
-          ramwe_s       <= '0'; 
-          
-          -- release memory fully written
-          releasewr_reg <= '0'; 
-          
-          -- request free memory for writing
-          requestwr_reg <= '1';
-          
-          -- DBUFCTL 1T delay
-          if requestwr_reg = '1' then
-            requestwr_reg <= '0';
-            state_reg <= IDLE;
-          end if; 
-
-        ----------------------
-        -- wait for input data
-        ----------------------
-        when IDLE =>
-
-          ramwe_s       <= '0'; 
-          
-          -- failure to allocate any memory buffer
-          if reqwrfail = '1' then
-             -- restart allocation procedure
-             state_reg  <= MEMREQ;
-          -- wait until 8 input words are latched in latchbuf_reg
-          -- by GET_PROC                    
-          elsif latch_done_reg = '1' then
-            state_reg       <= SUM;
-          end if; 
-
-        ----------------------
-        -- get MAC results from ROM even and ROM odd memories
-        ----------------------
-        when GET_ROM => 
-            
-           ramwe_s   <='0'; 
-         
-           state_reg <= SUM;
-           
-        ---------------------
-        -- do distributed arithmetic sum on even part,
-        -- write even part to RAM
-        ---------------------  
-        when SUM =>
-           
+        if stage2_cnt_reg(0) = '0' then
           ramdatai_s <= STD_LOGIC_VECTOR(RESIZE
             (RESIZE(SIGNED(romedatao0),DA_W) + 
             (RESIZE(SIGNED(romedatao1),DA_W-1) & '0') +
@@ -282,27 +182,7 @@ begin
             (RESIZE(SIGNED(romedatao7),DA_W-7) & "0000000") -
             (RESIZE(SIGNED(romedatao8),DA_W-8) & "00000000"),
                                         DA_W)(DA_W-1 downto 12));
-         
-          -- write even part
-          ramwe_s   <= '1';
-          -- reverse col/row order for transposition purpose
-          ramwaddro <= STD_LOGIC_VECTOR(col_reg & row_reg);
-           
-          col_reg <= col_reg + 1;
-          col_tmp_reg <= col_reg + 2;
-         
-           
-          state_reg <= WRITE_ODD; 
-    
-        ---------------------
-        -- do distributed arithmetic sum on odd part,
-        -- write odd part to RAM
-        ---------------------
-        when WRITE_ODD =>  
-          
-          -- write odd part
-          --ramwe_s   <= '1';
-             
+        else
           ramdatai_s <= STD_LOGIC_VECTOR(RESIZE
             (RESIZE(SIGNED(romodatao0),DA_W) + 
             (RESIZE(SIGNED(romodatao1),DA_W-1) & '0') +
@@ -313,86 +193,86 @@ begin
             (RESIZE(SIGNED(romodatao6),DA_W-6) & "000000") + 
             (RESIZE(SIGNED(romodatao7),DA_W-7) & "0000000") -
             (RESIZE(SIGNED(romodatao8),DA_W-8) & "00000000"),
-            DA_W)(DA_W-1 downto 12));                         
-         
-          -- write odd part
-          -- reverse col/row order for transposition purpose
-          ramwaddro <= STD_LOGIC_VECTOR(col_reg & row_reg);    
-          
-          -- move to next column
-          col_reg <= col_reg + 1;
-          col_tmp_reg <= col_reg + 1;
-              
-          -- finished processing one input row
-          if col_reg = N - 1 then
-            row_reg         <= row_reg + 1;
+                                        DA_W)(DA_W-1 downto 12));
+        end if;
+        
+        stage2_cnt_reg <= stage2_cnt_reg + 1;
+        
+        -- write RAM
+        ramwe_s   <= '1';
+        -- reverse col/row order for transposition purpose
+        ramwaddro <= STD_LOGIC_VECTOR(col_2_reg & row_reg);
+        -- increment column counter
+        col_reg   <= col_reg + 1;
+        col_2_reg <= col_2_reg + 1;
+        
+        -- finished processing one input row
+        if col_reg = 0 then
+          row_reg         <= row_reg + 1;
+          -- switch to 2nd memory
+          if row_reg = N - 1 then
+            wmemsel_reg <= not wmemsel_reg;
             col_reg         <= (others => '0');
-            col_tmp_reg     <= (others => '0');   
-            if row_reg = N - 1 then
-              releasewr_reg <= '1';
-              state_reg     <= MEMREQ;
-            else
-              state_reg     <= IDLE;
-            end if;
-          else       
-            state_reg       <= SUM;
           end if;
-        --------------------------------
-        -- OTHERS
-        --------------------------------
-        when others =>
-          state_reg  <= IDLE;
-      end case;
+        end if;  
+ 
+      end if;
+      
+      if stage2_reg = '1' then
+        stage2_cnt_reg <= (others => '0');
+        col_reg        <= (0=>'1',others => '0');
+        col_2_reg      <= (others => '0');
+      end if;
+      ----------------------------------    
     end if;
   end process;
   
   -- read precomputed MAC results from LUT
-  romeaddro0 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro0 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(0) & 
            databuf_reg(1)(0) &
            databuf_reg(2)(0) &
            databuf_reg(3)(0);
-  romeaddro1 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro1 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(1) & 
            databuf_reg(1)(1) &
            databuf_reg(2)(1) &
            databuf_reg(3)(1);
-  romeaddro2 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro2 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(2) & 
            databuf_reg(1)(2) &
            databuf_reg(2)(2) &
            databuf_reg(3)(2);          
-  romeaddro3 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro3 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(3) & 
            databuf_reg(1)(3) &
            databuf_reg(2)(3) &
            databuf_reg(3)(3);                    
-  romeaddro4  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro4  <= STD_LOGIC_VECTOR( col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(4) & 
            databuf_reg(1)(4) &
            databuf_reg(2)(4) &
            databuf_reg(3)(4); 
-  romeaddro5  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro5  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(5) & 
            databuf_reg(1)(5) &
            databuf_reg(2)(5) &
            databuf_reg(3)(5);
-  romeaddro6  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro6  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(6) & 
            databuf_reg(1)(6) &
            databuf_reg(2)(6) &
            databuf_reg(3)(6);
-  romeaddro7  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro7  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(7) & 
            databuf_reg(1)(7) &
            databuf_reg(2)(7) &
            databuf_reg(3)(7);                                       
-  romeaddro8  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro8  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(8) & 
            databuf_reg(1)(8) &
            databuf_reg(2)(8) &
-           databuf_reg(3)(8);
-                     
+           databuf_reg(3)(8);                  
                      
   -- odd
   romoaddro0 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
@@ -440,6 +320,7 @@ begin
              databuf_reg(5)(8) &
              databuf_reg(6)(8) &
              databuf_reg(7)(8);
+    
   
 end RTL;
 --------------------------------------------------------------------------------

@@ -36,7 +36,7 @@ entity MDCT is
     dcti         : in std_logic_vector(IP_W-1 downto 0);
     idv          : in STD_LOGIC;
 
-    ready        : out STD_LOGIC; -- ready for input data
+    fiforead     : out STD_LOGIC; -- ready for input data
     odv          : out STD_LOGIC;
     dcto         : out std_logic_vector(COE_W-1 downto 0);
     -- debug
@@ -53,8 +53,8 @@ architecture RTL of MDCT is
 ------------------------------
 component DCT1D	 
 	port(	  
-		clk          : in STD_LOGIC;  
-		rst          : in std_logic;
+		  clk          : in STD_LOGIC;  
+		  rst          : in std_logic;
       dcti         : in std_logic_vector(IP_W-1 downto 0);
       idv          : in STD_LOGIC;
       romedatao0   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
@@ -75,9 +75,7 @@ component DCT1D
       romodatao6   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       romodatao7   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       romodatao8   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
-      reqwrfail    : in STD_LOGIC;
 
-      ready        : out STD_LOGIC; -- read from FIFO
       odv          : out STD_LOGIC;
       dcto         : out std_logic_vector(OP_W-1 downto 0);
       romeaddro0   : out STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
@@ -101,8 +99,7 @@ component DCT1D
       ramwaddro    : out STD_LOGIC_VECTOR(RAMADRR_W-1 downto 0);
       ramdatai     : out STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
       ramwe        : out STD_LOGIC;
-      requestwr    : out STD_LOGIC;
-      releasewr    : out STD_LOGIC 	
+      wmemsel      : out STD_LOGIC 	
 		);
 end component;	
 
@@ -136,7 +133,6 @@ component DCT2D
       romodatao9   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       romodatao10  : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       ramdatao     : in STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
-      reqrdfail    : in STD_LOGIC;
       dataready    : in STD_LOGIC;
  
       odv          : out STD_LOGIC;
@@ -164,8 +160,8 @@ component DCT2D
       romoaddro9   : out STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
       romoaddro10  : out STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
       ramraddro    : out STD_LOGIC_VECTOR(RAMADRR_W-1 downto 0);
-      requestrd    : out STD_LOGIC;
-      releaserd    : out STD_LOGIC 
+      rmemsel      : out STD_LOGIC;
+      datareadyack : out STD_LOGIC 
 );
 end component;
 
@@ -215,16 +211,13 @@ component DBUFCTL is
 	port(	  
 		clk          : in STD_LOGIC;  
 		rst          : in STD_LOGIC;
-    requestwr    : in STD_LOGIC;
-    requestrd    : in STD_LOGIC;
-    releasewr    : in STD_LOGIC;
-    releaserd    : in STD_LOGIC;
+    wmemsel      : in STD_LOGIC;
+    rmemsel      : in STD_LOGIC;
+    datareadyack : in STD_LOGIC;
       
     memswitchwr  : out STD_LOGIC;
     memswitchrd  : out STD_LOGIC;
-    reqwrfail    : out STD_LOGIC;
-    reqrdfail    : out STD_LOGIC;
-    dataready    : out STD_LOGIC
+    dataready    : out STD_LOGIC 
 );
 end component;
 
@@ -324,13 +317,10 @@ signal ramwe1_s              : STD_LOGIC;
 signal ramwe2_s              : STD_LOGIC; 
 signal memswitchrd_s         : STD_LOGIC;
 signal memswitchwr_s         : STD_LOGIC;
-signal reqwrfail_s           : STD_LOGIC; 
-signal reqrdfail_s           : STD_LOGIC;
+signal wmemsel_s             : STD_LOGIC; 
+signal rmemsel_s             : STD_LOGIC;
 signal dataready_s           : STD_LOGIC;
-signal requestwr_s           : STD_LOGIC;
-signal releasewr_s           : STD_LOGIC;
-signal requestrd_s           : STD_LOGIC;
-signal releaserd_s           : STD_LOGIC;
+signal datareadyack_s        : STD_LOGIC;
 
 begin	
 
@@ -360,10 +350,8 @@ U_DCT1D : DCT1D
       romodatao5   => romodatao5_s,   
       romodatao6   => romodatao6_s,   
       romodatao7   => romodatao7_s,
-      romodatao8   => romodatao8_s,
-      reqwrfail    => reqwrfail_s,        
-
-      ready        => ready,     
+      romodatao8   => romodatao8_s,     
+  
       odv          => odv1,
       dcto         => dcto1,
       romeaddro0   => romeaddro0_s,
@@ -387,8 +375,7 @@ U_DCT1D : DCT1D
       ramwaddro    => ramwaddro_s,
       ramdatai     => ramdatai_s,
       ramwe        => ramwe_s,
-      requestwr    => requestwr_s,
-      releasewr    => releasewr_s 
+      wmemsel      => wmemsel_s
 		);
 
 ------------------------------
@@ -421,7 +408,6 @@ U_DCT2D : DCT2D
       romodatao9   => romo2datao9_s,
       romodatao10  => romo2datao10_s,
       ramdatao     => ramdatao_s,
-      reqrdfail    => reqrdfail_s,
       dataready    => dataready_s,  
     
       odv          => odv,
@@ -449,8 +435,8 @@ U_DCT2D : DCT2D
       romoaddro9   => romo2addro9_s,
       romoaddro10  => romo2addro10_s,
       ramraddro    => ramraddro_s,
-      requestrd    => requestrd_s,
-      releaserd    => releaserd_s
+      rmemsel      => rmemsel_s,
+      datareadyack => datareadyack_s
 		);
 
 ------------------------------
@@ -493,15 +479,12 @@ U_DBUFCTL : DBUFCTL
 	port map(	  
 		clk            => clk,
 		rst            => rst,
-    requestwr      => requestwr_s,
-    requestrd      => requestrd_s,
-    releasewr      => releasewr_s,
-    releaserd      => releaserd_s,
+    wmemsel        => wmemsel_s,
+    rmemsel        => rmemsel_s,
+    datareadyack   => datareadyack_s,
       
     memswitchwr    => memswitchwr_s,
     memswitchrd    => memswitchrd_s,
-    reqwrfail      => reqwrfail_s,
-    reqrdfail      => reqrdfail_s,
     dataready      => dataready_s
 		);  
 

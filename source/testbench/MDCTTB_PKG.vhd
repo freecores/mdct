@@ -75,15 +75,16 @@ package MDCTTB_PKG is
     ----------------------------------------------  
     -- set below to true to enable quantization in testbench
     constant ENABLE_QUANTIZATION_C : BOOLEAN := FALSE; 
-    constant HEX_BASE      : INTEGER := 16;
-    constant DEC_BASE      : INTEGER := 10;
-    constant FILEIN_NAME_C : STRING := "SOURCE\TESTBENCH\lena512.txt";
+    constant HEX_BASE          : INTEGER := 16;
+    constant DEC_BASE          : INTEGER := 10;
+    constant RUN_FULL_IMAGE    : BOOLEAN := FALSE;
+    constant FILEIN_NAME_C     : STRING := "SOURCE\TESTBENCH\lena512.txt";
     constant FILEERROR_NAME_C  : STRING := "SOURCE\TESTBENCH\imagee.txt";
     constant FILEIMAGEO_NAME_C : STRING := "SOURCE\TESTBENCH\imageo.txt";
-    constant MAX_ERROR_1D  : INTEGER := 1;
-    constant MAX_ERROR_2D  : INTEGER := 4;
-    constant MAX_PIX_VAL   : INTEGER := 2**IP_W-1;
-    constant null_data_r   : MATRIX_TYPE := 
+    constant MAX_ERROR_1D      : INTEGER := 1;
+    constant MAX_ERROR_2D      : INTEGER := 4;
+    constant MAX_PIX_VAL       : INTEGER := 2**IP_W-1;
+    constant null_data_r       : MATRIX_TYPE := 
                           (
                           (000.0,000.0,000.0,000.0,000.0,000.0,000.0,000.0),
                           (000.0,000.0,000.0,000.0,000.0,000.0,000.0,000.0),
@@ -129,7 +130,30 @@ package MDCTTB_PKG is
                           (000,000,000,000,000,000,000,000),
                           (000,000,000,000,000,000,000,000),
                           (000,000,000,000,000,000,000,000)
+                          );
+    constant input_data3   : I_MATRIX_TYPE := 
+                          (
+                          (55,89,0,2,35,34,100,255),
+                          (144,151,153,151,159,156,156,156),
+                          (150,155,165,163,158,126,156,156),
+                          (254,000,255,255,000,245,254,255),
+                          (159,199,161,162,162,133,155,165),
+                          (231,000,255,235,000,255,254,253),
+                          (162,162,161,163,162,157,157,157),
+                          (11,12,167,165,166,167,101,108)
                           ); 
+                          
+   constant input_data4   : I_MATRIX_TYPE := 
+                          (
+                          (135,14,145,15,155,15,155,15),
+                          (140,15,151,15,152,15,153,15),
+                          (154,15,165,16,156,15,157,15),
+                          (158,16,168,16,169,15,150,15),
+                          (15,161,16,162,16,153,15,154),
+                          (165,16,166,16,167,15,158,15),
+                          (16,169,16,160,16,152,15,153),
+                          (164,16,165,16,165,15,156,15)
+                          );                       
     
     -- from JPEG standard (but not in standard itself!)                      
     constant Q_JPEG_STD : I_MATRIX_TYPE := 
@@ -337,7 +361,7 @@ package body MDCTTB_PKG is
      for a in 0 to N - 1 loop
        for b in 0 to N - 1 loop
          error_matrix_v(a,b) := ref_matrix(a,b) - dcto_matrix(a,b);
-         if error_matrix_v(a,b) > max_error then
+         if abs(error_matrix_v(a,b)) > max_error then
            error_cnt := error_cnt + 1;
            assert false
              report "E01: DCT max error violated!"

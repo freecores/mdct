@@ -45,7 +45,7 @@ component MDCT
     dcti         : in std_logic_vector(IP_W-1 downto 0);
     idv          : in STD_LOGIC;
 
-    ready        : out STD_LOGIC; -- ready for input data
+    fiforead     : out STD_LOGIC; -- ready for input data
     odv          : out STD_LOGIC;
 		dcto         : out std_logic_vector(COE_W-1 downto 0);
       -- debug
@@ -89,7 +89,7 @@ signal rst_s               : STD_LOGIC;
 signal dcti_s              : STD_LOGIC_VECTOR(IP_W-1 downto 0); 
 signal idv_s               : STD_LOGIC;
 
-signal ready_s             : STD_LOGIC;
+signal fiforead_s          : STD_LOGIC;
 signal odv_s               : STD_LOGIC;
 signal dcto_s              : STD_LOGIC_VECTOR(COE_W-1 downto 0);
 signal odv1_s              : STD_LOGIC;
@@ -110,7 +110,7 @@ U_MDCT : MDCT
       dcti         => dcti_s,   
       idv          => idv_s,  
 
-      ready        => ready_s,     
+      fiforead     => fiforead_s,     
       odv          => odv_s,
       dcto         => dcto_s,
       odv1         => odv1_s,
@@ -134,7 +134,7 @@ U_CLKGEN : CLKGEN
 U_INPIMAGE : INPIMAGE
   port map (   
         clk       => clk_s,        
-        ready     => ready_s,
+        ready     => fiforead_s,
         odv1      => odv1_s,
         dcto1     => dcto1_s,
         odv       => odv_s,

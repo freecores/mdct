@@ -55,7 +55,6 @@ entity DCT2D is
       romodatao9   : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       romodatao10  : in STD_LOGIC_VECTOR(ROMDATA_W-1 downto 0);
       ramdatao     : in STD_LOGIC_VECTOR(RAMDATA_W-1 downto 0);
-      reqrdfail    : in STD_LOGIC;
       dataready    : in STD_LOGIC;
  
       odv          : out STD_LOGIC;
@@ -83,27 +82,13 @@ entity DCT2D is
       romoaddro9   : out STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
       romoaddro10  : out STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
       ramraddro    : out STD_LOGIC_VECTOR(RAMADRR_W-1 downto 0);
-      requestrd    : out STD_LOGIC;
-      releaserd    : out STD_LOGIC
+      rmemsel      : out STD_LOGIC;
+      datareadyack : out STD_LOGIC
 		
 		);
 end DCT2D;
 
 architecture RTL of DCT2D is   
-
-  type STATE2_T is 
-  (
-    IDLE,
-    GET_ROM,
-    SUM,
-    WRITE_ODD
-  );
-  
-  type ISTATE2_T is 
-  (
-    IDLE_I,
-    ACQUIRE_1ROW
-  );
   
   type input_data2 is array (N-1 downto 0) of SIGNED(RAMDATA_W downto 0);
   
@@ -111,177 +96,96 @@ architecture RTL of DCT2D is
   signal latchbuf_reg   : input_data2;
   signal col_reg        : UNSIGNED(RAMADRR_W/2-1 downto 0);
   signal row_reg        : UNSIGNED(RAMADRR_W/2-1 downto 0);
-  signal state_reg      : STATE2_T;
-  signal istate_reg     : ISTATE2_T;
-  signal cnt_reg        : UNSIGNED(3 downto 0);
-  signal latch_done_reg : STD_LOGIC;
+  signal colram_reg     : UNSIGNED(RAMADRR_W/2-1 downto 0);
   signal rowram_reg     : UNSIGNED(RAMADRR_W/2-1 downto 0);
-  signal colram_reg     : UNSIGNED(RAMADRR_W/2 downto 0);
-  signal requestrd_reg  : STD_LOGIC;
-  signal releaserd_reg  : STD_LOGIC;
-  signal completed_reg  : STD_LOGIC;
-  signal col_tmp_reg    : UNSIGNED(RAMADRR_W/2-1 downto 0);
+  signal colr_reg       : UNSIGNED(RAMADRR_W/2-1 downto 0);
+  signal rowr_reg       : UNSIGNED(RAMADRR_W/2-1 downto 0);
+  signal rmemsel_reg    : STD_LOGIC;
+  signal stage1_reg     : STD_LOGIC; 
+  signal stage2_reg     : STD_LOGIC; 
+  signal stage2_cnt_reg : UNSIGNED(RAMADRR_W-1 downto 0);
+  signal dataready_2_reg : STD_LOGIC;  
   	   
 begin
 
   ramraddro_sg:
-  ramraddro  <= STD_LOGIC_VECTOR(rowram_reg & colram_reg(2 downto 0));
+  ramraddro  <= STD_LOGIC_VECTOR(rowr_reg & colr_reg);
   
-  requestrd_sg:
-  requestrd  <= requestrd_reg;
+  rmemsel_sg:
+  rmemsel    <= rmemsel_reg;
   
-  releaserd_sg:
-  releaserd  <= releaserd_reg;
-    
-  GET_PROC : process(rst,clk)
-  begin
-    if rst = '1' then   
-      rowram_reg     <= (others => '0');
-      colram_reg     <= (others => '0');
-      latchbuf_reg   <= (others => (others => '0'));
-      istate_reg     <= IDLE_I; 
-      latch_done_reg <= '0';
-      completed_reg  <= '0';
-      requestrd_reg  <= '0';
-      releaserd_reg  <= '0';
-      databuf_reg  <= (others => (others => '0'));
-    elsif clk = '1' and clk'event then
-      case istate_reg is
-      
-        ----------------------
-        -- IDLE
-        ----------------------
-        when IDLE_I =>
-          -- one of ram buffers has new data, process it
-          if dataready = '1' then
-            requestrd_reg <= '1';
-          end if;
-          -- give 1T delay needed by DBUFCTL
-          if requestrd_reg = '1' then
-            requestrd_reg <= '0';
-            istate_reg <= ACQUIRE_1ROW;
-            -- to account for 1T RAM delay, increment RAM address counter
-            colram_reg <= (0=>'1',others => '0');
-          end if;      
-        
-        ----------------------
-        -- latch input data to barrel shifter
-        ----------------------
-        when ACQUIRE_1ROW =>
-          
-          if latch_done_reg = '0' then 
-            -- not starting from zero b/c of RAM 1T delay
-            if colram_reg /= 0 then
-              -- right shift input data
-              latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
-              latchbuf_reg(N-1)          <= RESIZE(SIGNED(ramdatao),RAMDATA_W+1);       
-            end if;  
-                
-            colram_reg  <= colram_reg + 1;
-              
-            -- not N-1   
-            if colram_reg = N then
-              -- finished reading 64 point 1D DCT from RAM
-              if rowram_reg = N-1 then
-                -- release memory
-                releaserd_reg <= '1';
-                completed_reg <= '1';
-              end if;
-              colram_reg  <= ( others => '0');    
-              rowram_reg  <= rowram_reg + 1;
-              -- 8 point input latched
-              latch_done_reg <= '1';
-              -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
-              databuf_reg(0)  <= latchbuf_reg(1)+RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
-              databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
-              databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
-              databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
-              databuf_reg(4)  <= latchbuf_reg(1)-RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
-              databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
-              databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
-              databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
-            end if;
-            
-            -- failure to allocate memory buffer
-            -- should never happen?
-            if reqrdfail = '1' then
-              istate_reg <= IDLE_I;
-            end if; 
-          else   
-            releaserd_reg <= '0';  
-            -- wait until DCT1D_PROC process 1D DCT computation 
-            -- before latching new 8 input words
-            if state_reg = IDLE then
-              latch_done_reg  <= '0';
-              if completed_reg = '1' then
-                completed_reg <= '0';
-                colram_reg    <= (others => '0');
-                istate_reg    <= IDLE_I;
-              else
-                istate_reg <= ACQUIRE_1ROW;
-                -- to account for 1T RAM delay, increment RAM address counter
-                colram_reg <= (0=>'1',others => '0');
-              end if;
-            end if;
-          end if;  
-           
-        when others =>
-          istate_reg <= IDLE_I;
-      end case;     
-    end if;  
-  end process;
-  
-
-  DCT1D_PROC: process(rst, clk)
+  process(rst,clk)
   begin
     if rst = '1' then
-      col_reg      <= (others => '0');
-      row_reg      <= (others => '0');  
-      state_reg    <= IDLE;
-      cnt_reg      <= (others => '0'); 
+      stage2_cnt_reg       <= (others => '1');
+      rmemsel_reg          <= '0';
+      stage1_reg           <= '0';
+      stage2_reg           <= '0';
+      colram_reg           <= (others => '0');
+      rowram_reg           <= (others => '0');
+      col_reg              <= (others => '0');
+      row_reg              <= (others => '0');
+      latchbuf_reg         <= (others => (others => '0')); 
+      databuf_reg          <= (others => (others => '0'));
+      dcto                 <= (others => '0');
+      odv                  <= '0';
+      colr_reg             <= (others => '0');
+      rowr_reg             <= (others => '0'); 
+      dataready_2_reg      <= '0';
+    elsif clk='1' and clk'event then
+    
+      stage2_reg    <= '0';
       odv           <= '0';
-      dcto          <= (others => '0');
-      col_tmp_reg   <= (others => '0');
-    elsif rising_edge(clk) then	
-      
-      case state_reg is
-        
-        ----------------------
-        -- wait for input data
-        ----------------------
-        when IDLE =>
-            
-          odv <= '0';  
-          -- wait until 8 input words are latched in latchbuf_reg
-          -- by GET_PROC                    
-          if latch_done_reg = '1' then
-            
-            state_reg   <= SUM;
-          end if;    
+      datareadyack  <= '0';
 
-        ----------------------
-        -- get MAC results from ROM even and ROM odd memories
-        ----------------------
-        when GET_ROM => 
-            
-           odv <= '0';                                              
-                               
-           state_reg <= SUM;
-           
-        ---------------------
-        -- do distributed arithmetic sum on even part,
-        -- write even part to RAM
-        ---------------------  
-        when SUM =>
-           
-          -- (a0 +
-          -- a1*2 +
-          -- (a2 + a3*2)*4 +
-          -- a4 * 2^4 +
-          -- a5*2 * 2^4 +
-          -- (a6 + 
-          -- a7*2)*2^6 )/
-          -- 2^11
+      dataready_2_reg <= dataready;
+      
+      ----------------------------------
+      -- read DCT 1D to barrel shifer
+      ----------------------------------
+      if stage1_reg = '1' then
+
+        -- right shift input data
+        latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
+        latchbuf_reg(N-1)          <= RESIZE(SIGNED(ramdatao),RAMDATA_W+1);       
+         
+        colram_reg  <= colram_reg + 1;
+        colr_reg    <= colr_reg + 1;
+          
+        if colram_reg = N-2 then
+          rowr_reg <= rowr_reg + 1;
+        end if;
+               
+        if colram_reg = N-1 then
+          rowram_reg <= rowram_reg + 1; 
+          if rowram_reg = N-1 then
+            stage1_reg    <= '0';
+            colr_reg      <= (others => '0');
+            -- release memory
+            rmemsel_reg    <= not rmemsel_reg;
+          end if;
+          
+          -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
+          databuf_reg(0)  <= latchbuf_reg(1)+RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
+          databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
+          databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
+          databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
+          databuf_reg(4)  <= latchbuf_reg(1)-RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
+          databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
+          databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
+          databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
+          
+          -- 8 point input latched
+          stage2_reg      <= '1';
+        end if;     
+      end if;
+        
+      --------------------------------
+      -- 2nd stage
+      --------------------------------
+      if stage2_cnt_reg < N then
+      
+        if stage2_cnt_reg(0) = '0' then
           dcto <= STD_LOGIC_VECTOR(RESIZE
             (RESIZE(SIGNED(romedatao0),DA2_W) + 
             (RESIZE(SIGNED(romedatao1),DA2_W-1) & '0') +
@@ -295,21 +199,7 @@ begin
             (RESIZE(SIGNED(romedatao9),DA2_W-9) & "000000000") -
             (RESIZE(SIGNED(romedatao10),DA2_W-10) & "0000000000"),            
             DA2_W)(DA2_W-1 downto 12));
-         
-          -- write even part
-          odv   <= '1';
-          
-          col_reg <= col_reg + 1;
-          col_tmp_reg <= col_reg + 2;
-      
-          state_reg <= WRITE_ODD; 
-    
-        ---------------------
-        -- do distributed arithmetic sum on odd part,
-        -- write odd part to RAM
-        ---------------------
-        when WRITE_ODD =>  
-             
+        else
           dcto <= STD_LOGIC_VECTOR(RESIZE
             (RESIZE(SIGNED(romodatao0),DA2_W) + 
             (RESIZE(SIGNED(romodatao1),DA2_W-1) & '0') +
@@ -322,80 +212,97 @@ begin
             (RESIZE(SIGNED(romodatao8),DA2_W-8) & "00000000") +
             (RESIZE(SIGNED(romodatao9),DA2_W-9) & "000000000") -
             (RESIZE(SIGNED(romodatao10),DA2_W-10) & "0000000000"),          
-            DA2_W)(DA2_W-1 downto 12));                            
- 
-          col_reg <= col_reg + 1;
-          col_tmp_reg <= col_reg + 1;
-              
-          -- finished processing one input row (1 x N)
-          if col_reg = N - 1 then
-            row_reg <= row_reg + 1;
-            col_reg <= (others => '0'); 
-            col_tmp_reg <= (others => '0');
-            state_reg  <= IDLE;
-          else
-            state_reg  <= SUM; 
-          end if;
+            DA2_W)(DA2_W-1 downto 12)); 
+        end if;
         
-        -----------------      
-        when others =>
-          state_reg  <= IDLE;
-      end case;
+        stage2_cnt_reg <= stage2_cnt_reg + 1;
+        
+        -- write RAM
+        odv       <= '1';
+  
+        -- increment column counter
+        col_reg   <= col_reg + 1;
+        
+        -- finished processing one input row
+        if col_reg = N - 1 then
+          row_reg         <= row_reg + 1;
+        end if;  
+      end if;
+        
+      if stage2_reg = '1' then
+        stage2_cnt_reg <= (others => '0');
+        col_reg        <= (0=>'1',others => '0');
+      end if;
+      --------------------------------
+      
+      ----------------------------------
+      -- wait for new data
+      ----------------------------------
+      -- one of ram buffers has new data, process it
+      if dataready = '1' and dataready_2_reg = '0'  then
+        stage1_reg    <= '1';
+        -- to account for 1T RAM delay, increment RAM address counter
+        colram_reg    <= (others => '0');
+        colr_reg      <= (0=>'1',others => '0');
+        datareadyack  <= '1';
+      end if;
+      ----------------------------------
+         
     end if;
-  end process;		
+  end process;
 
   -- read precomputed MAC results from LUT
-  romeaddro0 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro0 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(0) & 
            databuf_reg(1)(0) &
            databuf_reg(2)(0) &
            databuf_reg(3)(0);
-  romeaddro1 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro1 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(1) & 
            databuf_reg(1)(1) &
            databuf_reg(2)(1) &
            databuf_reg(3)(1);
-  romeaddro2 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro2 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(2) & 
            databuf_reg(1)(2) &
            databuf_reg(2)(2) &
            databuf_reg(3)(2);
-  romeaddro3 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro3 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(3) & 
            databuf_reg(1)(3) &
            databuf_reg(2)(3) &
            databuf_reg(3)(3);          
-  romeaddro4 <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro4 <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(4) & 
            databuf_reg(1)(4) &
            databuf_reg(2)(4) &
            databuf_reg(3)(4);                    
-  romeaddro5  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro5  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(5) & 
            databuf_reg(1)(5) &
            databuf_reg(2)(5) &
            databuf_reg(3)(5); 
-  romeaddro6  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro6  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(6) & 
            databuf_reg(1)(6) &
            databuf_reg(2)(6) &
            databuf_reg(3)(6);
-  romeaddro7  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro7  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(7) & 
            databuf_reg(1)(7) &
            databuf_reg(2)(7) &
            databuf_reg(3)(7);
-  romeaddro8  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro8  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(8) & 
            databuf_reg(1)(8) &
            databuf_reg(2)(8) &
            databuf_reg(3)(8); 
-  romeaddro9  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro9  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(9) & 
            databuf_reg(1)(9) &
            databuf_reg(2)(9) &
            databuf_reg(3)(9);
-  romeaddro10  <= STD_LOGIC_VECTOR(col_tmp_reg(RAMADRR_W/2-1 downto 1)) & 
+  romeaddro10  <= STD_LOGIC_VECTOR(col_reg(RAMADRR_W/2-1 downto 1)) & 
            databuf_reg(0)(10) & 
            databuf_reg(1)(10) &
            databuf_reg(2)(10) &

@@ -29,6 +29,7 @@ library STD;
 library WORK;
   use WORK.MDCT_PKG.all;
   use WORK.MDCTTB_PKG.all;
+  use WORK.RNG.all;
   
 entity INPIMAGE is
   port (   
@@ -54,6 +55,7 @@ architecture SIM of INPIMAGE is
   
   signal rst_s                : STD_LOGIC;
   signal test_inp             : INTEGER;
+  signal test_stim            : INTEGER;
   signal test_out             : INTEGER;
   signal xcon_s               : INTEGER;
   signal ycon_s               : INTEGER;
@@ -68,9 +70,12 @@ begin
  -- input image stimuli  
  --------------------------
  INPIMAGE_PROC: process
-   variable i : INTEGER := 0;
-   variable j : INTEGER := 0;
+   variable i : INTEGER   := 0;
+   variable j : INTEGER   := 0;
    variable INSERT_DELAYS : BOOLEAN := FALSE;
+   variable unf:	Uniform  := InitUniform(7, 0.0, 2.0);
+  	variable rnd:	real     := 0.0;
+  	variable xi            : INTEGER := 0;
    
   -------------------------------------
   -- wait for defined number of clock cycles
@@ -159,9 +164,6 @@ begin
             xcon_s <= x_blk_cnt*N+j;
             ycon_s <= y_blk_cnt*N+i;
             waitposedge;
-            while(ready = '0') loop
-              waitposedge;
-            end loop;
             if INSERT_DELAYS = TRUE then
               dv    <= '0';
               waitposedge(40);
@@ -179,6 +181,7 @@ begin
    -- process begin
    ---------------------------
    begin
+     test_stim <= 0;
      dv      <= '0';
      imageo  <= (others => '0'); 
      rst_s <= '1';
@@ -188,14 +191,12 @@ begin
      -------------------------
      -- test 1
      -------------------------
+     test_stim <= 1;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
          dv      <= '1';
          imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
          waitposedge;
-         while(ready = '0') loop
-           waitposedge;
-         end loop;
        end loop;
      
      end loop;
@@ -207,14 +208,12 @@ begin
      -------------------------
      -- test 2
      -------------------------
+     test_stim <= 2;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
          dv      <= '1';
          imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W));
          waitposedge;
-         while(ready = '0') loop
-           waitposedge;
-         end loop;
        end loop;
      
      end loop;
@@ -226,14 +225,12 @@ begin
      -------------------------
      -- test 3
      -------------------------
+     test_stim <= 3;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
          dv      <= '1';
          imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data2(i,j)),IP_W));
          waitposedge;
-         while(ready = '0') loop
-           waitposedge;
-         end loop;
        end loop;
      
      end loop;
@@ -245,14 +242,12 @@ begin
      -------------------------
      -- test 4
      -------------------------
+     test_stim <= 4;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
          dv      <= '1';
-         imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W));
+         imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
          waitposedge;
-         while(ready = '0') loop
-           waitposedge;
-         end loop;
          dv      <= '0';
          waitposedge;
        end loop;
@@ -266,14 +261,12 @@ begin
      -------------------------
      -- test 5
      -------------------------
+     test_stim <= 5;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
          dv      <= '1';
          imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W));
          waitposedge;
-         while(ready = '0') loop
-           waitposedge;
-         end loop;
          dv      <= '0';
          waitposedge(25);
        end loop;
@@ -285,9 +278,74 @@ begin
      ------------------------
      
      -------------------------
+     -- test 6-16
+     -------------------------
+     
+     for x in 0 to 10 loop
+       test_stim <= test_stim+1;
+       for i in 0 to 7 loop
+         for j in 0 to 7 loop
+           dv      <= '1';
+           if x rem 2 = 0 then
+             imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
+           else
+             imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data3(i,j)),IP_W));
+           end if;
+           waitposedge;
+         end loop;
+       end loop;
+     end loop;
+
+     dv <= '0';
+     waitposedge;
+     ------------------------
+     
+     -------------------------
+     -- test 17-33
+     -------------------------
+     
+     for x in 0 to 48 loop
+       test_stim <= test_stim+1;
+       if xi < 4 then
+         xi := xi + 1;
+       else
+         xi := 0;
+       end if; 
+       for i in 0 to 7 loop
+         for j in 0 to 7 loop
+           dv      <= '1';
+ 
+           case xi is
+             when 0 =>
+               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W)); 
+             when 1 =>
+               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W)); 
+             when 2 =>
+               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data3(i,j)),IP_W));
+             when 3 =>
+               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data4(i,j)),IP_W)); 
+             when others =>
+               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));    
+           end case;
+           waitposedge;
+           dv      <= '0';
+           GenRnd(unf);
+          	rnd := unf.rnd;
+          	waitposedge(INTEGER(rnd));
+         end loop;
+       end loop;
+     end loop;
+
+     dv <= '0';
+     waitposedge;
+     ------------------------
+     
+     -------------------------
      -- test 6
      -------------------------
-     read_image;
+     if RUN_FULL_IMAGE = TRUE then
+       read_image;
+     end if;
      
      -------------------------
      -- test 7
@@ -313,6 +371,7 @@ begin
    variable raport_str   : STRING(1 to 255);
    variable ref_matrix   : I_MATRIX_TYPE;
    variable dcto_matrix  : I_MATRIX_TYPE;
+   variable xi           : INTEGER := 0;
   -------------------------------------
   -- wait for defined number of clock cycles
   -------------------------------------
@@ -448,8 +507,6 @@ begin
        end loop;
      end loop;
      
-     waitposedge;
-     
      CMP_MATRIX(ref_matrix,dcto_matrix,MAX_ERROR_1D,error_matrix,error_cnt);
      -------------------------
      
@@ -476,8 +533,6 @@ begin
  
        end loop;
      end loop;
-     
-     waitposedge;
      
      CMP_MATRIX(ref_matrix,dcto_matrix,MAX_ERROR_1D,error_matrix,error_cnt);
      -------------------------
@@ -506,8 +561,6 @@ begin
        end loop;
      end loop;
      
-     waitposedge;
-     
      CMP_MATRIX(ref_matrix,dcto_matrix,MAX_ERROR_1D,error_matrix,error_cnt);
      -------------------------
      
@@ -516,7 +569,7 @@ begin
      -------------------------
      test_inp <= 4;  
      -- compute reference coefficients
-     ref_matrix := COMPUTE_REF_DCT1D(input_data1,TRUE); 
+     ref_matrix := COMPUTE_REF_DCT1D(input_data0,TRUE); 
        
      for i in 0 to N-1 loop
        j := 0;
@@ -534,8 +587,6 @@ begin
  
        end loop;
      end loop;
-     
-     waitposedge;
      
      CMP_MATRIX(ref_matrix,dcto_matrix,MAX_ERROR_1D,error_matrix,error_cnt);
      -------------------------
@@ -564,9 +615,82 @@ begin
        end loop;
      end loop;
      
-     waitposedge;
-     
      CMP_MATRIX(ref_matrix,dcto_matrix,MAX_ERROR_1D,error_matrix,error_cnt);
+     -------------------------
+     
+     -------------------------
+     -- test 6-16
+     -------------------------
+     for x in 0 to 10 loop
+       test_inp <= test_inp + 1;  
+       -- compute reference coefficients
+       if x rem 2 = 0 then
+         ref_matrix := COMPUTE_REF_DCT1D(input_data0,TRUE); 
+       else
+         ref_matrix := COMPUTE_REF_DCT1D(input_data3,TRUE);
+       end if;
+       for i in 0 to N-1 loop
+         j := 0;
+         while(true) loop
+  
+           waitposedge;
+           if odv1 = '1' then
+             dcto_matrix(j,i) := TO_INTEGER(SIGNED( dcto1 ));
+             j := j + 1;
+           end if;
+  
+           if j = N then
+             exit;
+           end if;
+   
+         end loop;
+       end loop;
+       CMP_MATRIX(ref_matrix,dcto_matrix,MAX_ERROR_1D,error_matrix,error_cnt);
+     end loop;
+     -------------------------
+     
+     -------------------------
+     -- test 17-33
+     -------------------------
+     for x in 0 to 48 loop
+       test_inp <= test_inp + 1;  
+       -- compute reference coefficients
+       if xi < 4 then
+         xi := xi + 1;
+       else
+         xi := 0;
+       end if;
+       case xi is
+         when 0 =>
+           ref_matrix := COMPUTE_REF_DCT1D(input_data1,TRUE); 
+         when 1 =>
+           ref_matrix := COMPUTE_REF_DCT1D(input_data0,TRUE); 
+         when 2 =>
+           ref_matrix := COMPUTE_REF_DCT1D(input_data3,TRUE); 
+         when 3 =>
+           ref_matrix := COMPUTE_REF_DCT1D(input_data4,TRUE); 
+         when others =>
+           ref_matrix := COMPUTE_REF_DCT1D(input_data0,TRUE);     
+       end case;
+
+       for i in 0 to N-1 loop
+         j := 0;
+         while(true) loop
+  
+           waitposedge;
+           if odv1 = '1' then
+             dcto_matrix(j,i) := TO_INTEGER(SIGNED( dcto1 ));
+             j := j + 1;
+           end if;
+  
+           if j = N then
+             exit;
+           end if;
+   
+         end loop;
+       end loop;
+       CMP_MATRIX(ref_matrix,dcto_matrix,MAX_ERROR_1D,error_matrix,error_cnt);
+     end loop;
      -------------------------
      
      -------------------------
@@ -574,7 +698,9 @@ begin
      -------------------------
      test_inp <= 6;  
      
-     read_image_for1dct(error_cnt);
+     if RUN_FULL_IMAGE = TRUE then
+       read_image_for1dct(error_cnt);
+     end if;
      -------------------------
      
      -------------------------
@@ -618,6 +744,7 @@ begin
    variable dcto_matrix     : I_MATRIX_TYPE;
    variable tmp_matrix      : I_MATRIX_TYPE;
    variable psnr            : REAL;
+   variable xi              : INTEGER := 0;
   -------------------------------------
   -- wait for defined number of clock cycles
   -------------------------------------
@@ -935,7 +1062,7 @@ begin
      -- test 4
      -------------------------
      test_out <= 4;  
-     tmp_matrix := input_data1;
+     tmp_matrix := input_data0;
      -- compute reference coefficients
      ref_matrix_1d := COMPUTE_REF_DCT1D(tmp_matrix,TRUE);
      ref_matrix_2d := COMPUTE_REF_DCT1D(ref_matrix_1d,FALSE); 
@@ -995,15 +1122,103 @@ begin
      
      CMP_MATRIX(ref_matrix_2d,dcto_matrix,MAX_ERROR_2D,error_matrix,error_cnt);
      idcto_matrix := COMPUTE_REF_IDCT(dcto_matrix);
-     --error_idct_matrix := CMP_MATRIX(tmp_matrix,idcto_matrix,MAX_ERROR_2D);
      psnr := COMPUTE_PSNR(tmp_matrix,idcto_matrix);
+     -------------------------
+     
+     -------------------------
+     -- test 6-16
+     -------------------------
+     for x in 0 to 10 loop
+       test_out <= test_out+1; 
+       
+       if x rem 2 = 0 then 
+         tmp_matrix := input_data0;
+       else
+         tmp_matrix := input_data3;
+       end if;
+       -- compute reference coefficients
+       ref_matrix_1d := COMPUTE_REF_DCT1D(tmp_matrix,TRUE);
+       ref_matrix_2d := COMPUTE_REF_DCT1D(ref_matrix_1d,FALSE); 
+         
+       for i in 0 to N-1 loop
+         j := 0;
+         while(true) loop
+  
+           waitposedge;
+           if odv = '1' then
+             dcto_matrix(j,i) := TO_INTEGER(SIGNED( dcto ));
+             j := j + 1;
+           end if;
+  
+           if j = N then
+             exit;
+           end if;
+   
+         end loop;
+       end loop;
+       
+       CMP_MATRIX(ref_matrix_2d,dcto_matrix,MAX_ERROR_2D,error_matrix,error_cnt);
+       idcto_matrix := COMPUTE_REF_IDCT(dcto_matrix);
+       psnr := COMPUTE_PSNR(tmp_matrix,idcto_matrix);
+     end loop;
+     -------------------------
+     
+     -------------------------
+     -- test 17-33
+     -------------------------
+     for x in 0 to 48 loop
+       test_out <= test_out+1; 
+       if xi < 4 then
+         xi := xi + 1;
+       else
+         xi := 0;
+       end if;
+       case xi is
+         when 0 =>
+           tmp_matrix := input_data1;
+         when 1 =>
+           tmp_matrix := input_data0;
+         when 2 =>
+           tmp_matrix := input_data3;
+         when 3 =>
+           tmp_matrix := input_data4;
+         when others =>
+           tmp_matrix := input_data0;    
+       end case;
+       -- compute reference coefficients
+       ref_matrix_1d := COMPUTE_REF_DCT1D(tmp_matrix,TRUE);
+       ref_matrix_2d := COMPUTE_REF_DCT1D(ref_matrix_1d,FALSE); 
+         
+       for i in 0 to N-1 loop
+         j := 0;
+         while(true) loop
+  
+           waitposedge;
+           if odv = '1' then
+             dcto_matrix(j,i) := TO_INTEGER(SIGNED( dcto ));
+             j := j + 1;
+           end if;
+
+           if j = N then
+             exit;
+           end if;
+   
+         end loop;
+       end loop;
+       
+       CMP_MATRIX(ref_matrix_2d,dcto_matrix,MAX_ERROR_2D,error_matrix,error_cnt);
+       idcto_matrix := COMPUTE_REF_IDCT(dcto_matrix);
+       psnr := COMPUTE_PSNR(tmp_matrix,idcto_matrix);
+     end loop;
      -------------------------
      
      -------------------------
      -- test 6
      -------------------------
      test_out <= 6; 
-     read_image_for2dct(error_cnt);
+     if RUN_FULL_IMAGE = TRUE then
+       read_image_for2dct(error_cnt);
+     end if;
      -------------------------
      
      -------------------------
