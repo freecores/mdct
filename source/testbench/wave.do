@@ -31,7 +31,6 @@ add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/co
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/row_reg
 add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dbufctl/memswitchwr
 add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dbufctl/memswitchrd
-add wave -noupdate -format Logic /tb_mdct/u_mdct/u_dct2d/clk
 add wave -noupdate -format Logic /tb_mdct/u_mdct/u_dct2d/rst
 add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dct2d/odv
 add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/u_dct2d/dcto
@@ -48,6 +47,7 @@ add wave -noupdate -format Logic /tb_mdct/u_mdct/u_dct1d/wmemsel
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct2d/col_reg
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct2d/row_reg
 add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dbufctl/dataready
+add wave -noupdate -format Logic /tb_mdct/u_mdct/u_dct2d/clk
 add wave -noupdate -format Literal -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/ramdatai_s
 add wave -noupdate -format Logic -radix hexadecimal /tb_mdct/u_mdct/u_dct1d/ramwe_s
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/inpimage_proc/i
@@ -80,19 +80,19 @@ add wave -noupdate -format Literal /tb_mdct/u_inpimage/final_outimage_proc/psnr
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/inpimage_proc/i
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/inpimage_proc/j
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/error_dcto1_matrix_s
-add wave -noupdate -format Logic /tb_mdct/u_mdct/u1_ram/clk
-add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_ram/d
-add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_ram/waddr
-add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_ram/raddr
+add wave -noupdate -format Logic -radix decimal /tb_mdct/u_mdct/u1_ram/clk
+add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/u1_ram/d
+add wave -noupdate -format Literal -radix unsigned /tb_mdct/u_mdct/u1_ram/raddr
+add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/u1_ram/waddr
 add wave -noupdate -format Logic /tb_mdct/u_mdct/u1_ram/we
 add wave -noupdate -format Logic /tb_mdct/u_mdct/u1_ram/clk
-add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_ram/q
+add wave -noupdate -format Literal -radix decimal /tb_mdct/u_mdct/u1_ram/q
 add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_ram/mem
 add wave -noupdate -format Literal /tb_mdct/u_mdct/u1_ram/read_addr
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/final_outimage_proc/i
 add wave -noupdate -format Literal /tb_mdct/u_inpimage/final_outimage_proc/j
 TreeUpdate [SetDefaultTree]
-WaveRestoreCursors {{Cursor 1} {220350000 ps} 0}
+WaveRestoreCursors {{Cursor 1} {7596588 ps} 0}
 configure wave -namecolwidth 155
 configure wave -valuecolwidth 103
 configure wave -justifyvalue left
@@ -106,4 +106,4 @@ configure wave -gridperiod 1
 configure wave -griddelta 40
 configure wave -timeline 0
 update
-WaveRestoreZoom {218222050 ps} {222338850 ps}
+WaveRestoreZoom {6158584 ps} {9141416 ps}

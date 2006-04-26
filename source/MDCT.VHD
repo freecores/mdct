@@ -36,7 +36,6 @@ entity MDCT is
     dcti         : in std_logic_vector(IP_W-1 downto 0);
     idv          : in STD_LOGIC;
 
-    fiforead     : out STD_LOGIC; -- ready for input data
     odv          : out STD_LOGIC;
     dcto         : out std_logic_vector(COE_W-1 downto 0);
     -- debug

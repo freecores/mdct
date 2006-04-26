@@ -34,7 +34,6 @@ library WORK;
 entity INPIMAGE is
   port (   
         clk               : in STD_LOGIC;
-        ready             : in STD_LOGIC;
         odv1              : in STD_LOGIC;
         dcto1             : in STD_LOGIC_VECTOR(OP_W-1 downto 0);
         odv               : in STD_LOGIC;
