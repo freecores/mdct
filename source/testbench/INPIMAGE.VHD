@@ -59,11 +59,16 @@ architecture SIM of INPIMAGE is
   signal xcon_s               : INTEGER;
   signal ycon_s               : INTEGER;
   signal error_dct_matrix_s   : I_MATRIX_TYPE;
-  signal error_dcto1_matrix_s : I_MATRIX_TYPE;  	 
+  signal error_dcto1_matrix_s : I_MATRIX_TYPE; 
+  signal imageo_s             : STD_LOGIC_VECTOR(IP_W-1 downto 0);
+  signal dv_s                 : STD_LOGIC; 	 
 
 begin
     
-  rst  <= rst_s;
+  rst  <= rst_s after HOLD_TIME;
+  
+  imageo <= imageo_s after HOLD_TIME;
+  dv     <= dv_s after HOLD_TIME;
     
  --------------------------
  -- input image stimuli  
@@ -157,14 +162,14 @@ begin
         
         for i in 0 to N-1 loop
           for j in 0 to N-1 loop
-            dv      <= '1';
-            imageo  <= STD_LOGIC_VECTOR(
+            dv_s      <= '1';
+            imageo_s  <= STD_LOGIC_VECTOR(
                          TO_UNSIGNED(INTEGER(matrix(i,j)),IP_W));
             xcon_s <= x_blk_cnt*N+j;
             ycon_s <= y_blk_cnt*N+i;
             waitposedge;
             if INSERT_DELAYS = TRUE then
-              dv    <= '0';
+              dv_s    <= '0';
               waitposedge(40);
             end if;
           end loop;
@@ -181,10 +186,10 @@ begin
    ---------------------------
    begin
      test_stim <= 0;
-     dv      <= '0';
-     imageo  <= (others => '0'); 
+     dv_s      <= '0';
+     imageo_s  <= (others => '0'); 
      rst_s <= '1';
-     waitposedge(2);
+     waitposedge(20);
      rst_s <= '0'; 
      
      -------------------------
@@ -193,14 +198,14 @@ begin
      test_stim <= 1;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
-         dv      <= '1';
-         imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
+         dv_s      <= '1';
+         imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
          waitposedge;
        end loop;
      
      end loop;
      
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      -------------------------
      
@@ -210,14 +215,14 @@ begin
      test_stim <= 2;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
-         dv      <= '1';
-         imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W));
+         dv_s      <= '1';
+         imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W));
          waitposedge;
        end loop;
      
      end loop;
      
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      ------------------------
      
@@ -227,14 +232,14 @@ begin
      test_stim <= 3;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
-         dv      <= '1';
-         imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data2(i,j)),IP_W));
+         dv_s      <= '1';
+         imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data2(i,j)),IP_W));
          waitposedge;
        end loop;
      
      end loop;
      
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      ------------------------
      
@@ -244,16 +249,16 @@ begin
      test_stim <= 4;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
-         dv      <= '1';
-         imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
+         dv_s      <= '1';
+         imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
          waitposedge;
-         dv      <= '0';
+         dv_s      <= '0';
          waitposedge;
        end loop;
      
      end loop;
      
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      ------------------------
      
@@ -263,16 +268,16 @@ begin
      test_stim <= 5;
      for i in 0 to 7 loop
        for j in 0 to 7 loop
-         dv      <= '1';
-         imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W));
+         dv_s      <= '1';
+         imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W));
          waitposedge;
-         dv      <= '0';
+         dv_s      <= '0';
          waitposedge(25);
        end loop;
      
      end loop;
      
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      ------------------------
      
@@ -284,18 +289,18 @@ begin
        test_stim <= test_stim+1;
        for i in 0 to 7 loop
          for j in 0 to 7 loop
-           dv      <= '1';
+           dv_s      <= '1';
            if x rem 2 = 0 then
-             imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
+             imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));
            else
-             imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data3(i,j)),IP_W));
+             imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data3(i,j)),IP_W));
            end if;
            waitposedge;
          end loop;
        end loop;
      end loop;
 
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      ------------------------
      
@@ -303,7 +308,7 @@ begin
      -- test 17-33
      -------------------------
      
-     for x in 0 to 48 loop
+     for x in 0 to 16 loop
        test_stim <= test_stim+1;
        if xi < 4 then
          xi := xi + 1;
@@ -312,22 +317,22 @@ begin
        end if; 
        for i in 0 to 7 loop
          for j in 0 to 7 loop
-           dv      <= '1';
+           dv_s      <= '1';
  
            case xi is
              when 0 =>
-               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W)); 
+               imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data1(i,j)),IP_W)); 
              when 1 =>
-               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W)); 
+               imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W)); 
              when 2 =>
-               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data3(i,j)),IP_W));
+               imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data3(i,j)),IP_W));
              when 3 =>
-               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data4(i,j)),IP_W)); 
+               imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data4(i,j)),IP_W)); 
              when others =>
-               imageo  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));    
+               imageo_s  <= STD_LOGIC_VECTOR(TO_UNSIGNED(INTEGER(input_data0(i,j)),IP_W));    
            end case;
            waitposedge;
-           dv      <= '0';
+           dv_s      <= '0';
            GenRnd(unf);
           	rnd := unf.rnd;
           	waitposedge(INTEGER(rnd));
@@ -335,7 +340,7 @@ begin
        end loop;
      end loop;
 
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      ------------------------
      
@@ -352,7 +357,7 @@ begin
      --INSERT_DELAYS := TRUE;
      --read_image;
      
-     dv <= '0';
+     dv_s <= '0';
      waitposedge;
      ------------------------ 
      
@@ -651,7 +656,7 @@ begin
      -------------------------
      -- test 17-33
      -------------------------
-     for x in 0 to 48 loop
+     for x in 0 to 16 loop
        test_inp <= test_inp + 1;  
        -- compute reference coefficients
        if xi < 4 then
@@ -1165,7 +1170,7 @@ begin
      -------------------------
      -- test 17-33
      -------------------------
-     for x in 0 to 48 loop
+     for x in 0 to 16 loop
        test_out <= test_out+1; 
        if xi < 4 then
          xi := xi + 1;

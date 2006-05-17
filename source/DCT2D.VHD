@@ -114,140 +114,142 @@ begin
   rmemsel_sg:
   rmemsel    <= rmemsel_reg;
   
-  process(rst,clk)
+  process(clk)
   begin
-    if rst = '1' then
-      stage2_cnt_reg       <= (others => '1');
-      rmemsel_reg          <= '0';
-      stage1_reg           <= '0';
-      stage2_reg           <= '0';
-      colram_reg           <= (others => '0');
-      rowram_reg           <= (others => '0');
-      col_reg              <= (others => '0');
-      row_reg              <= (others => '0');
-      latchbuf_reg         <= (others => (others => '0')); 
-      databuf_reg          <= (others => (others => '0'));
-      dcto                 <= (others => '0');
-      odv                  <= '0';
-      colr_reg             <= (others => '0');
-      rowr_reg             <= (others => '0'); 
-      dataready_2_reg      <= '0';
-    elsif clk='1' and clk'event then
-    
-      stage2_reg    <= '0';
-      odv           <= '0';
-      datareadyack  <= '0';
-
-      dataready_2_reg <= dataready;
+    if clk='1' and clk'event then
+      if rst = '1' then
+        stage2_cnt_reg       <= (others => '1');
+        rmemsel_reg          <= '0';
+        stage1_reg           <= '0';
+        stage2_reg           <= '0';
+        colram_reg           <= (others => '0');
+        rowram_reg           <= (others => '0');
+        col_reg              <= (others => '0');
+        row_reg              <= (others => '0');
+        latchbuf_reg         <= (others => (others => '0')); 
+        databuf_reg          <= (others => (others => '0'));
+        dcto                 <= (others => '0');
+        odv                  <= '0';
+        colr_reg             <= (others => '0');
+        rowr_reg             <= (others => '0'); 
+        dataready_2_reg      <= '0';
+      else
       
-      ----------------------------------
-      -- read DCT 1D to barrel shifer
-      ----------------------------------
-      if stage1_reg = '1' then
-
-        -- right shift input data
-        latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
-        latchbuf_reg(N-1)          <= RESIZE(SIGNED(ramdatao),RAMDATA_W+1);       
-         
-        colram_reg  <= colram_reg + 1;
-        colr_reg    <= colr_reg + 1;
-          
-        if colram_reg = N-2 then
-          rowr_reg <= rowr_reg + 1;
+        stage2_reg    <= '0';
+        odv           <= '0';
+        datareadyack  <= '0';
+  
+        dataready_2_reg <= dataready;
+        
+        ----------------------------------
+        -- read DCT 1D to barrel shifer
+        ----------------------------------
+        if stage1_reg = '1' then
+  
+          -- right shift input data
+          latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
+          latchbuf_reg(N-1)          <= RESIZE(SIGNED(ramdatao),RAMDATA_W+1);       
+           
+          colram_reg  <= colram_reg + 1;
+          colr_reg    <= colr_reg + 1;
+            
+          if colram_reg = N-2 then
+            rowr_reg <= rowr_reg + 1;
+          end if;
+                 
+          if colram_reg = N-1 then
+            rowram_reg <= rowram_reg + 1; 
+            if rowram_reg = N-1 then
+              stage1_reg    <= '0';
+              colr_reg      <= (others => '0');
+              -- release memory
+              rmemsel_reg    <= not rmemsel_reg;
+            end if;
+            
+            -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
+            databuf_reg(0)  <= latchbuf_reg(1)+RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
+            databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
+            databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
+            databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
+            databuf_reg(4)  <= latchbuf_reg(1)-RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
+            databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
+            databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
+            databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
+            
+            -- 8 point input latched
+            stage2_reg      <= '1';
+          end if;     
         end if;
-               
-        if colram_reg = N-1 then
-          rowram_reg <= rowram_reg + 1; 
-          if rowram_reg = N-1 then
-            stage1_reg    <= '0';
-            colr_reg      <= (others => '0');
-            -- release memory
-            rmemsel_reg    <= not rmemsel_reg;
+          
+        --------------------------------
+        -- 2nd stage
+        --------------------------------
+        if stage2_cnt_reg < N then
+        
+          if stage2_cnt_reg(0) = '0' then
+            dcto <= STD_LOGIC_VECTOR(RESIZE
+              (RESIZE(SIGNED(romedatao0),DA2_W) + 
+              (RESIZE(SIGNED(romedatao1),DA2_W-1) & '0') +
+              (RESIZE(SIGNED(romedatao2),DA2_W-2) & "00") + 
+              (RESIZE(SIGNED(romedatao3),DA2_W-3) & "000") +
+              (RESIZE(SIGNED(romedatao4),DA2_W-4) & "0000") +
+              (RESIZE(SIGNED(romedatao5),DA2_W-5) & "00000") +
+              (RESIZE(SIGNED(romedatao6),DA2_W-6) & "000000") + 
+              (RESIZE(SIGNED(romedatao7),DA2_W-7) & "0000000") +
+              (RESIZE(SIGNED(romedatao8),DA2_W-8) & "00000000") +
+              (RESIZE(SIGNED(romedatao9),DA2_W-9) & "000000000") -
+              (RESIZE(SIGNED(romedatao10),DA2_W-10) & "0000000000"),            
+              DA2_W)(DA2_W-1 downto 12));
+          else
+            dcto <= STD_LOGIC_VECTOR(RESIZE
+              (RESIZE(SIGNED(romodatao0),DA2_W) + 
+              (RESIZE(SIGNED(romodatao1),DA2_W-1) & '0') +
+              (RESIZE(SIGNED(romodatao2),DA2_W-2) & "00") + 
+              (RESIZE(SIGNED(romodatao3),DA2_W-3) & "000") +
+              (RESIZE(SIGNED(romodatao4),DA2_W-4) & "0000") +
+              (RESIZE(SIGNED(romodatao5),DA2_W-5) & "00000") +
+              (RESIZE(SIGNED(romodatao6),DA2_W-6) & "000000") + 
+              (RESIZE(SIGNED(romodatao7),DA2_W-7) & "0000000") +
+              (RESIZE(SIGNED(romodatao8),DA2_W-8) & "00000000") +
+              (RESIZE(SIGNED(romodatao9),DA2_W-9) & "000000000") -
+              (RESIZE(SIGNED(romodatao10),DA2_W-10) & "0000000000"),          
+              DA2_W)(DA2_W-1 downto 12)); 
           end if;
           
-          -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
-          databuf_reg(0)  <= latchbuf_reg(1)+RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
-          databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
-          databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
-          databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
-          databuf_reg(4)  <= latchbuf_reg(1)-RESIZE(SIGNED(ramdatao),RAMDATA_W+1);
-          databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
-          databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
-          databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
+          stage2_cnt_reg <= stage2_cnt_reg + 1;
           
-          -- 8 point input latched
-          stage2_reg      <= '1';
-        end if;     
-      end if;
-        
-      --------------------------------
-      -- 2nd stage
-      --------------------------------
-      if stage2_cnt_reg < N then
-      
-        if stage2_cnt_reg(0) = '0' then
-          dcto <= STD_LOGIC_VECTOR(RESIZE
-            (RESIZE(SIGNED(romedatao0),DA2_W) + 
-            (RESIZE(SIGNED(romedatao1),DA2_W-1) & '0') +
-            (RESIZE(SIGNED(romedatao2),DA2_W-2) & "00") + 
-            (RESIZE(SIGNED(romedatao3),DA2_W-3) & "000") +
-            (RESIZE(SIGNED(romedatao4),DA2_W-4) & "0000") +
-            (RESIZE(SIGNED(romedatao5),DA2_W-5) & "00000") +
-            (RESIZE(SIGNED(romedatao6),DA2_W-6) & "000000") + 
-            (RESIZE(SIGNED(romedatao7),DA2_W-7) & "0000000") +
-            (RESIZE(SIGNED(romedatao8),DA2_W-8) & "00000000") +
-            (RESIZE(SIGNED(romedatao9),DA2_W-9) & "000000000") -
-            (RESIZE(SIGNED(romedatao10),DA2_W-10) & "0000000000"),            
-            DA2_W)(DA2_W-1 downto 12));
-        else
-          dcto <= STD_LOGIC_VECTOR(RESIZE
-            (RESIZE(SIGNED(romodatao0),DA2_W) + 
-            (RESIZE(SIGNED(romodatao1),DA2_W-1) & '0') +
-            (RESIZE(SIGNED(romodatao2),DA2_W-2) & "00") + 
-            (RESIZE(SIGNED(romodatao3),DA2_W-3) & "000") +
-            (RESIZE(SIGNED(romodatao4),DA2_W-4) & "0000") +
-            (RESIZE(SIGNED(romodatao5),DA2_W-5) & "00000") +
-            (RESIZE(SIGNED(romodatao6),DA2_W-6) & "000000") + 
-            (RESIZE(SIGNED(romodatao7),DA2_W-7) & "0000000") +
-            (RESIZE(SIGNED(romodatao8),DA2_W-8) & "00000000") +
-            (RESIZE(SIGNED(romodatao9),DA2_W-9) & "000000000") -
-            (RESIZE(SIGNED(romodatao10),DA2_W-10) & "0000000000"),          
-            DA2_W)(DA2_W-1 downto 12)); 
+          -- write RAM
+          odv       <= '1';
+    
+          -- increment column counter
+          col_reg   <= col_reg + 1;
+          
+          -- finished processing one input row
+          if col_reg = N - 1 then
+            row_reg         <= row_reg + 1;
+          end if;  
         end if;
+          
+        if stage2_reg = '1' then
+          stage2_cnt_reg <= (others => '0');
+          col_reg        <= (0=>'1',others => '0');
+        end if;
+        --------------------------------
         
-        stage2_cnt_reg <= stage2_cnt_reg + 1;
-        
-        -- write RAM
-        odv       <= '1';
-  
-        -- increment column counter
-        col_reg   <= col_reg + 1;
-        
-        -- finished processing one input row
-        if col_reg = N - 1 then
-          row_reg         <= row_reg + 1;
-        end if;  
+        ----------------------------------
+        -- wait for new data
+        ----------------------------------
+        -- one of ram buffers has new data, process it
+        if dataready = '1' and dataready_2_reg = '0'  then
+          stage1_reg    <= '1';
+          -- to account for 1T RAM delay, increment RAM address counter
+          colram_reg    <= (others => '0');
+          colr_reg      <= (0=>'1',others => '0');
+          datareadyack  <= '1';
+        end if;
+        ----------------------------------
+           
       end if;
-        
-      if stage2_reg = '1' then
-        stage2_cnt_reg <= (others => '0');
-        col_reg        <= (0=>'1',others => '0');
-      end if;
-      --------------------------------
-      
-      ----------------------------------
-      -- wait for new data
-      ----------------------------------
-      -- one of ram buffers has new data, process it
-      if dataready = '1' and dataready_2_reg = '0'  then
-        stage1_reg    <= '1';
-        -- to account for 1T RAM delay, increment RAM address counter
-        colram_reg    <= (others => '0');
-        colr_reg      <= (0=>'1',others => '0');
-        datareadyack  <= '1';
-      end if;
-      ----------------------------------
-         
     end if;
   end process;
 

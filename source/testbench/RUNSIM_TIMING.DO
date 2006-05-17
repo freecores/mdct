@@ -23,10 +23,10 @@
 # -------------------------------------------------------------------------- #
 # Start simulation                                                           #
 # -------------------------------------------------------------------------- #
-  #do SOURCE/TESTBENCH/COMPILE_TIMING.DO
+  do SOURCE/TESTBENCH/COMPILE_TIMING.DO
   
-  vsim -t ps -sdftyp /tb_mdct/u_mdct=SYNTHESIS/MDCT_TEMP_2/MDCT_OUT.SDF WORK.CONF_MDCT_TIMING  	
-  do SOURCE/TESTBENCH/WAVE.DO
+  vsim -t ps -sdftyp /tb_mdct/u_mdct=SYNTHESIS/PRECISION/PROJECT_1_IMPL_1/MDCT_OUT.SDF WORK.CONF_MDCT_TIMING  	
+  do SOURCE/TESTBENCH/WAVE_TIM.DO
 
   while {[exa testend_s] == "false"} {run 1 ms}
     

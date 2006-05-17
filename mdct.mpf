@@ -225,7 +225,7 @@ resolution = 1ps
 UserTimeUnit = default
 
 ; Default run length
-RunLength = 1 ps
+RunLength = 0 ps
 
 ; Maximum iterations that can be run without advancing simulation time
 IterationLimit = 5000
@@ -619,6 +619,6 @@ XML_DoubleClick = Edit
 XML_CustomDoubleClick = 
 LOGFILE_DoubleClick = Edit
 LOGFILE_CustomDoubleClick = 
-EditorState = {tabbed horizontal 1} {C:/elektronika/dct/MDCT/source/testbench/INPIMAGE.VHD 0 0} {C:/elektronika/dct/MDCT/source/testbench/MDCTTB_PKG.vhd 0 0} {C:/elektronika/dct/MDCT/source/MDCT.VHD 0 0} {C:/elektronika/dct/MDCT/source/testbench/MDCT_TB.VHD 0 1}
+EditorState = {tabbed horizontal 1} {C:/elektronika/dct/MDCT/source/DCT1D.vhd 0 0} {C:/elektronika/dct/MDCT/source/testbench/INPIMAGE.VHD 0 0} {F:/Xilinx/vhdl/src/simprims/simprim_VITAL_mti.vhd 0 0} {C:/elektronika/dct/MDCT/source/testbench/MDCTTB_PKG.vhd 0 1}
 Project_Major_Version = 6
 Project_Minor_Version = 1

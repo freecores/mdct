@@ -24,7 +24,7 @@ library IEEE;
   use ieee.numeric_std.all; 
 
 library WORK;
-  use WORK.MDCT_PKG.all;
+  use WORK.MDCTTB_PKG.all;
   
 entity CLKGEN is
   port (   

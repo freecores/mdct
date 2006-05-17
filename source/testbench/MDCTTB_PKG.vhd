@@ -74,10 +74,12 @@ package MDCTTB_PKG is
     -- constant section 2
     ----------------------------------------------  
     -- set below to true to enable quantization in testbench
+    constant CLK_FREQ_C        : INTEGER := 50;
+    constant HOLD_TIME         : TIME := 1 ns;
     constant ENABLE_QUANTIZATION_C : BOOLEAN := FALSE; 
     constant HEX_BASE          : INTEGER := 16;
     constant DEC_BASE          : INTEGER := 10;
-    constant RUN_FULL_IMAGE    : BOOLEAN := TRUE;
+    constant RUN_FULL_IMAGE    : BOOLEAN := FALSE;
     constant FILEIN_NAME_C     : STRING := "SOURCE\TESTBENCH\lena512.txt";
     constant FILEERROR_NAME_C  : STRING := "SOURCE\TESTBENCH\imagee.txt";
     constant FILEIMAGEO_NAME_C : STRING := "SOURCE\TESTBENCH\imageo.txt";

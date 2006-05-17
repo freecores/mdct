@@ -25,8 +25,7 @@ library IEEE;
   use ieee.numeric_std.all;
   
 package MDCT_PKG is
-   
-  constant CLK_FREQ_C           : INTEGER := 10; 
+    
   constant IP_W                 : INTEGER := 8; 
   constant OP_W                 : INTEGER := 12; 
   constant N                    : INTEGER := 8;

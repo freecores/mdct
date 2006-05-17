@@ -4,13 +4,13 @@ N = 8;
 
 input_s = input./2;
 
-A = round(cos(pi/4)*(2^11));
-B = round(cos(pi/8)*(2^11));
-C = round(sin(pi/8)*(2^11));
-D = round(cos(pi/16)*(2^11));
-E = round(cos(3*pi/16)*(2^11));
-F = round(sin(3*pi/16)*(2^11));
-G = round(sin(pi/16)*(2^11));
+A = round(cos(pi/4)*(2^11))
+B = round(cos(pi/8)*(2^11))
+C = round(sin(pi/8)*(2^11))
+D = round(cos(pi/16)*(2^11))
+E = round(cos(3*pi/16)*(2^11))
+F = round(sin(3*pi/16)*(2^11))
+G = round(sin(pi/16)*(2^11))
 Ce = [
    A,  A,  A,  A;
    B,  C, -C, -B;

@@ -25,23 +25,15 @@ set XILINX $env(XILINX)
 vlib simprim
 vmap simprim simprim
 
-compxlib -s mti_se -f virtex2p -l all $XILINX/vhdl/src/simprims/simprim_Vpackage_mti.vhd
-compxlib -s mti_se -f virtex2p -l all $XILINX/vhdl/src/simprims/simprim_Vcomponents_mti.vhd
-compxlib -s mti_se -f virtex2p -l all $XILINX/vhdl/src/simprims/simprim_VITAL_mti.vhd
-
+compxlib -s mti_se -arch all -l all -lib simprim
 vlib work
 vmap work work
 
 vcom SOURCE/MDCT_PKG.vhd
-vcom SOURCE/ROME.VHD
-vcom SOURCE/ROMO.VHD
-vcom SOURCE/RAM.VHD
-vcom SOURCE/DCT1D.VHD
-vcom SOURCE/DCT2D.VHD
-vcom SOURCE/DBUFCTL.VHD
-vcom SYNTHESIS/MDCT_TEMP_2/MDCT_OUT.VHD
+
+vcom SYNTHESIS/PRECISION/PROJECT_1_IMPL_1/MDCT_OUT.VHD
+vcom SOURCE/TESTBENCH/MDCTTB_PKG.VHD
 vcom SOURCE/TESTBENCH/random1.VHD
 vcom SOURCE/TESTBENCH/CLKGEN.VHD
-vcom SOURCE/TESTBENCH/MDCTTB_PKG.VHD
 vcom SOURCE/TESTBENCH/INPIMAGE.VHD
 vcom SOURCE/TESTBENCH/MDCT_TB.VHD

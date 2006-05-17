@@ -623,5 +623,5 @@
 ))))
 (design ram_xil (cellRef ram_xil (libraryRef test_lib))
   (property X_CORE_INFO (string "blkmemdp_v6_1, Coregen 6.3i"))
-  (property PART (string "XC3S5000-4-fg900") (owner "Xilinx")))
+  (property PART (string "XC3S1000-ft256-4") (owner "Xilinx")))
 )

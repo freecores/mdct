@@ -23,23 +23,23 @@
 --     appliances, devices, or systems. Use in such applications are          --
 --     expressly prohibited.                                                  --
 --                                                                            --
---     (c) Copyright 1995-2004 Xilinx, Inc.                                   --
+--     (c) Copyright 1995-2005 Xilinx, Inc.                                   --
 --     All rights reserved.                                                   --
 --------------------------------------------------------------------------------
 -- You must compile the wrapper file rome_xil.vhd when simulating
 -- the core, rome_xil. When compiling the wrapper file, be sure to
 -- reference the XilinxCoreLib VHDL simulation library. For detailed
--- instructions, please refer to the "CORE Generator Guide".
+-- instructions, please refer to the "CORE Generator Help".
 
 -- The synopsys directives "translate_off/translate_on" specified
 -- below are supported by XST, FPGA Compiler II, Mentor Graphics and Synplicity
 -- synthesis tools. Ensure they are correct for your synthesis tool(s).
 
--- synopsys translate_off
 LIBRARY ieee;
 USE ieee.std_logic_1164.ALL;
-
+-- synopsys translate_off
 Library XilinxCoreLib;
+-- synopsys translate_on
 ENTITY rome_xil IS
 	port (
 	A: IN std_logic_VECTOR(5 downto 0);
@@ -48,7 +48,7 @@ ENTITY rome_xil IS
 END rome_xil;
 
 ARCHITECTURE rome_xil_a OF rome_xil IS
-
+-- synopsys translate_off
 component wrapped_rome_xil
 	port (
 	A: IN std_logic_VECTOR(5 downto 0);
@@ -71,37 +71,38 @@ end component;
 			c_width => 14,
 			c_reg_a_d_inputs => 0,
 			c_latency => 1,
-			c_has_we => 0,
 			c_has_spo => 0,
+			c_has_we => 0,
 			c_depth => 64,
 			c_has_i_ce => 0,
-			c_default_data => "0",
 			c_default_data_radix => 2,
+			c_default_data => "0",
 			c_has_dpra => 0,
 			c_has_clk => 1,
-			c_enable_rlocs => 1,
+			c_enable_rlocs => 0,
 			c_generate_mif => 1,
-			c_addr_width => 6,
 			c_has_qspo_ce => 0,
+			c_addr_width => 6,
 			c_has_qdpo_srst => 0,
 			c_mux_type => 0,
 			c_has_spra => 0,
 			c_has_qdpo => 0,
 			c_mem_init_file => "c:/elektronika/dct/mdct/source/xilinx/rome_xil.mif",
 			c_reg_dpra_input => 0,
-			c_has_rd_en => 0,
 			c_has_qspo_srst => 0,
+			c_has_rd_en => 0,
 			c_read_mif => 1,
 			c_sync_enable => 0,
 			c_has_qdpo_ce => 0);
+-- synopsys translate_on
 BEGIN
-
+-- synopsys translate_off
 U0 : wrapped_rome_xil
 		port map (
 			A => A,
 			CLK => CLK,
 			QSPO => QSPO);
-END rome_xil_a;
-
 -- synopsys translate_on
+
+END rome_xil_a;
 

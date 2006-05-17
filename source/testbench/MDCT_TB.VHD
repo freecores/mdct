@@ -24,9 +24,6 @@ library IEEE;
   use IEEE.STD_LOGIC_1164.all;
 library WORK;
   use WORK.MDCT_PKG.all;
-library SIMPRIM;
-  use SIMPRIM.VCOMPONENTS.ALL;
-  use SIMPRIM.VPACKAGE.ALL;
 
 entity TB_MDCT is
 end TB_MDCT;
@@ -65,7 +62,7 @@ end component;
 ------------------------------
 -- Input image generator
 ------------------------------
-component INPIMAGE is
+component INPIMAGE
   port (   
         clk               : in STD_LOGIC;
         odv1              : in STD_LOGIC;

@@ -119,111 +119,113 @@ begin
   wmemsel_sg:
   wmemsel <= wmemsel_reg;
  
-  process(clk,rst)
+  process(clk)
   begin
-    if rst = '1' then
-      inpcnt_reg     <= (others => '0');
-      latchbuf_reg   <= (others => (others => '0')); 
-      databuf_reg    <= (others => (others => '0'));
-      stage2_reg     <= '0';
-      stage2_cnt_reg <= (others => '1');
-      ramdatai_s     <= (others => '0');
-      ramwe_s        <= '0';
-      ramwaddro      <= (others => '0');
-      col_reg        <= (others => '0');
-      row_reg        <= (others => '0');
-      wmemsel_reg    <= '0';
-      col_2_reg      <= (others => '0');
-    elsif clk = '1' and clk'event then
-
-      stage2_reg     <= '0';
-      ramwe_s        <= '0';
- 
-      --------------------------------
-      -- 1st stage
-      --------------------------------
-      if idv = '1' then
-      
-        inpcnt_reg    <= inpcnt_reg + 1;
-
-        -- right shift input data
-        latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
-        latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;
-
-        if inpcnt_reg = N-1 then
-          -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
-          databuf_reg(0)  <= latchbuf_reg(1)+(SIGNED('0' & dcti) - LEVEL_SHIFT);
-          databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
-          databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
-          databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
-          databuf_reg(4)  <= latchbuf_reg(1)-(SIGNED('0' & dcti) - LEVEL_SHIFT);
-          databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
-          databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
-          databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
-          stage2_reg      <= '1';
-        end if;
-      end if;
-      --------------------------------
-      
-      --------------------------------
-      -- 2nd stage
-      --------------------------------
-      if stage2_cnt_reg < N then
-        
-        if stage2_cnt_reg(0) = '0' then
-          ramdatai_s <= STD_LOGIC_VECTOR(RESIZE
-            (RESIZE(SIGNED(romedatao0),DA_W) + 
-            (RESIZE(SIGNED(romedatao1),DA_W-1) & '0') +
-            (RESIZE(SIGNED(romedatao2),DA_W-2) & "00") + 
-            (RESIZE(SIGNED(romedatao3),DA_W-3) & "000") +
-            (RESIZE(SIGNED(romedatao4),DA_W-4) & "0000") +
-            (RESIZE(SIGNED(romedatao5),DA_W-5) & "00000") +
-            (RESIZE(SIGNED(romedatao6),DA_W-6) & "000000") + 
-            (RESIZE(SIGNED(romedatao7),DA_W-7) & "0000000") -
-            (RESIZE(SIGNED(romedatao8),DA_W-8) & "00000000"),
-                                        DA_W)(DA_W-1 downto 12));
-        else
-          ramdatai_s <= STD_LOGIC_VECTOR(RESIZE
-            (RESIZE(SIGNED(romodatao0),DA_W) + 
-            (RESIZE(SIGNED(romodatao1),DA_W-1) & '0') +
-            (RESIZE(SIGNED(romodatao2),DA_W-2) & "00") + 
-            (RESIZE(SIGNED(romodatao3),DA_W-3) & "000") +
-            (RESIZE(SIGNED(romodatao4),DA_W-4) & "0000") +
-            (RESIZE(SIGNED(romodatao5),DA_W-5) & "00000") +
-            (RESIZE(SIGNED(romodatao6),DA_W-6) & "000000") + 
-            (RESIZE(SIGNED(romodatao7),DA_W-7) & "0000000") -
-            (RESIZE(SIGNED(romodatao8),DA_W-8) & "00000000"),
-                                        DA_W)(DA_W-1 downto 12));
-        end if;
-        
-        stage2_cnt_reg <= stage2_cnt_reg + 1;
-        
-        -- write RAM
-        ramwe_s   <= '1';
-        -- reverse col/row order for transposition purpose
-        ramwaddro <= STD_LOGIC_VECTOR(col_2_reg & row_reg);
-        -- increment column counter
-        col_reg   <= col_reg + 1;
-        col_2_reg <= col_2_reg + 1;
-        
-        -- finished processing one input row
-        if col_reg = 0 then
-          row_reg         <= row_reg + 1;
-          -- switch to 2nd memory
-          if row_reg = N - 1 then
-            wmemsel_reg <= not wmemsel_reg;
-            col_reg         <= (others => '0');
-          end if;
-        end if;  
- 
-      end if;
-      
-      if stage2_reg = '1' then
-        stage2_cnt_reg <= (others => '0');
-        col_reg        <= (0=>'1',others => '0');
+    if clk = '1' and clk'event then
+      if rst = '1' then
+        inpcnt_reg     <= (others => '0');
+        latchbuf_reg   <= (others => (others => '0')); 
+        databuf_reg    <= (others => (others => '0'));
+        stage2_reg     <= '0';
+        stage2_cnt_reg <= (others => '1');
+        ramdatai_s     <= (others => '0');
+        ramwe_s        <= '0';
+        ramwaddro      <= (others => '0');
+        col_reg        <= (others => '0');
+        row_reg        <= (others => '0');
+        wmemsel_reg    <= '0';
         col_2_reg      <= (others => '0');
+      else
+  
+        stage2_reg     <= '0';
+        ramwe_s        <= '0';
+   
+        --------------------------------
+        -- 1st stage
+        --------------------------------
+        if idv = '1' then
+        
+          inpcnt_reg    <= inpcnt_reg + 1;
+  
+          -- right shift input data
+          latchbuf_reg(N-2 downto 0) <= latchbuf_reg(N-1 downto 1);
+          latchbuf_reg(N-1)          <= SIGNED('0' & dcti) - LEVEL_SHIFT;
+  
+          if inpcnt_reg = N-1 then
+            -- after this sum databuf_reg is in range of -256 to 254 (min to max) 
+            databuf_reg(0)  <= latchbuf_reg(1)+(SIGNED('0' & dcti) - LEVEL_SHIFT);
+            databuf_reg(1)  <= latchbuf_reg(2)+latchbuf_reg(7);
+            databuf_reg(2)  <= latchbuf_reg(3)+latchbuf_reg(6);
+            databuf_reg(3)  <= latchbuf_reg(4)+latchbuf_reg(5);
+            databuf_reg(4)  <= latchbuf_reg(1)-(SIGNED('0' & dcti) - LEVEL_SHIFT);
+            databuf_reg(5)  <= latchbuf_reg(2)-latchbuf_reg(7);
+            databuf_reg(6)  <= latchbuf_reg(3)-latchbuf_reg(6);
+            databuf_reg(7)  <= latchbuf_reg(4)-latchbuf_reg(5);
+            stage2_reg      <= '1';
+          end if;
+        end if;
+        --------------------------------
+        
+        --------------------------------
+        -- 2nd stage
+        --------------------------------
+        if stage2_cnt_reg < N then
+          
+          if stage2_cnt_reg(0) = '0' then
+            ramdatai_s <= STD_LOGIC_VECTOR(RESIZE
+              (RESIZE(SIGNED(romedatao0),DA_W) + 
+              (RESIZE(SIGNED(romedatao1),DA_W-1) & '0') +
+              (RESIZE(SIGNED(romedatao2),DA_W-2) & "00") + 
+              (RESIZE(SIGNED(romedatao3),DA_W-3) & "000") +
+              (RESIZE(SIGNED(romedatao4),DA_W-4) & "0000") +
+              (RESIZE(SIGNED(romedatao5),DA_W-5) & "00000") +
+              (RESIZE(SIGNED(romedatao6),DA_W-6) & "000000") + 
+              (RESIZE(SIGNED(romedatao7),DA_W-7) & "0000000") -
+              (RESIZE(SIGNED(romedatao8),DA_W-8) & "00000000"),
+                                          DA_W)(DA_W-1 downto 12));
+          else
+            ramdatai_s <= STD_LOGIC_VECTOR(RESIZE
+              (RESIZE(SIGNED(romodatao0),DA_W) + 
+              (RESIZE(SIGNED(romodatao1),DA_W-1) & '0') +
+              (RESIZE(SIGNED(romodatao2),DA_W-2) & "00") + 
+              (RESIZE(SIGNED(romodatao3),DA_W-3) & "000") +
+              (RESIZE(SIGNED(romodatao4),DA_W-4) & "0000") +
+              (RESIZE(SIGNED(romodatao5),DA_W-5) & "00000") +
+              (RESIZE(SIGNED(romodatao6),DA_W-6) & "000000") + 
+              (RESIZE(SIGNED(romodatao7),DA_W-7) & "0000000") -
+              (RESIZE(SIGNED(romodatao8),DA_W-8) & "00000000"),
+                                          DA_W)(DA_W-1 downto 12));
+          end if;
+          
+          stage2_cnt_reg <= stage2_cnt_reg + 1;
+          
+          -- write RAM
+          ramwe_s   <= '1';
+          -- reverse col/row order for transposition purpose
+          ramwaddro <= STD_LOGIC_VECTOR(col_2_reg & row_reg);
+          -- increment column counter
+          col_reg   <= col_reg + 1;
+          col_2_reg <= col_2_reg + 1;
+          
+          -- finished processing one input row
+          if col_reg = 0 then
+            row_reg         <= row_reg + 1;
+            -- switch to 2nd memory
+            if row_reg = N - 1 then
+              wmemsel_reg <= not wmemsel_reg;
+              col_reg         <= (others => '0');
+            end if;
+          end if;  
+   
+        end if;
+        
+        if stage2_reg = '1' then
+          stage2_cnt_reg <= (others => '0');
+          col_reg        <= (0=>'1',others => '0');
+          col_2_reg      <= (others => '0');
+        end if;
+        ----------------------------------    
       end if;
-      ----------------------------------    
     end if;
   end process;
   

@@ -206,7 +206,7 @@ end component;
 ------------------------------
 -- DBUFCTL
 ------------------------------
-component DBUFCTL is	
+component DBUFCTL	
 	port(	  
 		clk          : in STD_LOGIC;  
 		rst          : in STD_LOGIC;
