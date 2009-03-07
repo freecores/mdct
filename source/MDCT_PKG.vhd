@@ -40,20 +40,22 @@ package MDCT_PKG is
   constant DA_W                 : INTEGER := ROMDATA_W+IP_W;
   constant DA2_W                : INTEGER := DA_W+2;
   -- 2's complement numbers
-  constant AP : SIGNED(ROMDATA_W-1 downto 0) := "00" & "010110101000";
-  constant BP : SIGNED(ROMDATA_W-1 downto 0) := "00" & "011101100100";
-  constant CP : SIGNED(ROMDATA_W-1 downto 0) := "00" & "001100010000";
-  constant DP : SIGNED(ROMDATA_W-1 downto 0) := "00" & "011111011001";
-  constant EP : SIGNED(ROMDATA_W-1 downto 0) := "00" & "011010100111";
-  constant FP : SIGNED(ROMDATA_W-1 downto 0) := "00" & "010001110010";
-  constant GP : SIGNED(ROMDATA_W-1 downto 0) := "00" & "000110010000";
 
-  constant AM : SIGNED(ROMDATA_W-1 downto 0) := "11" & "101001011000";
-  constant BM : SIGNED(ROMDATA_W-1 downto 0) := "11" & "100010011100";
-  constant CM : SIGNED(ROMDATA_W-1 downto 0) := "11" & "110011110000";
-  constant DM : SIGNED(ROMDATA_W-1 downto 0) := "11" & "100000100111";
-  constant EM : SIGNED(ROMDATA_W-1 downto 0) := "11" & "100101011001";
-  constant FM : SIGNED(ROMDATA_W-1 downto 0) := "11" & "101110001110";
-  constant GM : SIGNED(ROMDATA_W-1 downto 0) := "11" & "111001110000";
+	constant AP : INTEGER := 1448;
+	constant BP : INTEGER := 1892;
+	constant CP : INTEGER := 784;
+	constant DP : INTEGER := 2009;
+	constant EP : INTEGER := 1703;
+	constant FP : INTEGER := 1138;
+	constant GP : INTEGER := 400;
+	constant AM : INTEGER := -1448;
+	constant BM : INTEGER := -1892;
+	constant CM : INTEGER := -784;
+	constant DM : INTEGER := -2009;
+	constant EM : INTEGER := -1703;
+	constant FM : INTEGER := -1138;
+	constant GM : INTEGER := -400;
+	
+
 
 end MDCT_PKG;
