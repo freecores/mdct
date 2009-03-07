@@ -13,6 +13,8 @@
 --
 -- File        : ROMO.VHD
 -- Created     : Sat Mar 5 7:37 2006
+-- Modified    : Dez. 30 2008 - Andreas Bergmann
+--               Libs and Typeconversion fixed due Xilinx Synthesis errors
 --
 --------------------------------------------------------------------------------
 --
@@ -26,7 +28,8 @@
 
 library IEEE; 
   use IEEE.STD_LOGIC_1164.all; 
-  use ieee.numeric_std.all; 
+--  use ieee.STD_LOGIC_signed.all; 
+  use IEEE.STD_LOGIC_arith.all;
   use WORK.MDCT_PKG.all;
 
 entity ROMO is 
@@ -45,83 +48,80 @@ architecture RTL of ROMO is
   constant rom : ROM_TYPE := 
     (
        (others => '0'),
-       std_logic_vector( GP ),
-       std_logic_vector( FP ),
-       std_logic_vector( FP+GP ),
-       std_logic_vector( EP ),
-       std_logic_vector( EP+GP ),
-       std_logic_vector( EP+FP ),
-       std_logic_vector( EP+FP+GP ),
-       std_logic_vector( DP ),
-       std_logic_vector( DP+GP ),
-       std_logic_vector( DP+FP ),
-       std_logic_vector( DP+FP+GP ),
-       std_logic_vector( DP+EP ),
-       std_logic_vector( DP+EP+GP ),
-       std_logic_vector( DP+EP+FP ),
-       std_logic_vector( DP+EP+FP+GP ),    
+       conv_std_logic_vector( GP,ROMDATA_W ),
+       conv_std_logic_vector( FP,ROMDATA_W ),
+       conv_std_logic_vector( FP+GP,ROMDATA_W ),
+       conv_std_logic_vector( EP,ROMDATA_W ),
+       conv_std_logic_vector( EP+GP,ROMDATA_W ),
+       conv_std_logic_vector( EP+FP,ROMDATA_W ),
+       conv_std_logic_vector( EP+FP+GP,ROMDATA_W ),
+       conv_std_logic_vector( DP,ROMDATA_W ),
+       conv_std_logic_vector( DP+GP,ROMDATA_W ),
+       conv_std_logic_vector( DP+FP,ROMDATA_W ),
+       conv_std_logic_vector( DP+FP+GP,ROMDATA_W ),
+       conv_std_logic_vector( DP+EP,ROMDATA_W ),
+       conv_std_logic_vector( DP+EP+GP,ROMDATA_W ),
+       conv_std_logic_vector( DP+EP+FP,ROMDATA_W ),
+       conv_std_logic_vector( DP+EP+FP+GP,ROMDATA_W ),    
       
        (others => '0'),
-       std_logic_vector( FM ),
-       std_logic_vector( DM ),
-       std_logic_vector( DM+FM ),
-       std_logic_vector( GM ),
-       std_logic_vector( GM+FM ),
-       std_logic_vector( GM+DM ),
-       std_logic_vector( GM+DM+FM ),
-       std_logic_vector( EP ),
-       std_logic_vector( EP+FM ),
-       std_logic_vector( EP+DM ),
-       std_logic_vector( EP+DM+FM ),
-       std_logic_vector( EP+GM ),
-       std_logic_vector( EP+GM+FM ),
-       std_logic_vector( EP+GM+DM ),
-       std_logic_vector( EP+GM+DM+FM ),
+       conv_std_logic_vector( FM,ROMDATA_W ),
+       conv_std_logic_vector( DM,ROMDATA_W ),
+       conv_std_logic_vector( DM+FM,ROMDATA_W ),
+       conv_std_logic_vector( GM,ROMDATA_W ),
+       conv_std_logic_vector( GM+FM,ROMDATA_W ),
+       conv_std_logic_vector( GM+DM,ROMDATA_W ),
+       conv_std_logic_vector( GM+DM+FM,ROMDATA_W ),
+       conv_std_logic_vector( EP,ROMDATA_W ),
+       conv_std_logic_vector( EP+FM,ROMDATA_W ),
+       conv_std_logic_vector( EP+DM,ROMDATA_W ),
+       conv_std_logic_vector( EP+DM+FM,ROMDATA_W ),
+       conv_std_logic_vector( EP+GM,ROMDATA_W ),
+       conv_std_logic_vector( EP+GM+FM,ROMDATA_W ),
+       conv_std_logic_vector( EP+GM+DM,ROMDATA_W ),
+       conv_std_logic_vector( EP+GM+DM+FM,ROMDATA_W ),
       
        (others => '0'),
-       std_logic_vector( EP ),
-       std_logic_vector( GP ),
-       std_logic_vector( EP+GP ),
-       std_logic_vector( DM ),
-       std_logic_vector( DM+EP ),
-       std_logic_vector( DM+GP ),
-       std_logic_vector( DM+GP+EP ),
-       std_logic_vector( FP ),
-       std_logic_vector( FP+EP ),
-       std_logic_vector( FP+GP ),
-       std_logic_vector( FP+GP+EP ),
-       std_logic_vector( FP+DM ),
-       std_logic_vector( FP+DM+EP ),
-       std_logic_vector( FP+DM+GP ),
-       std_logic_vector( FP+DM+GP+EP ),
+       conv_std_logic_vector( EP,ROMDATA_W ),
+       conv_std_logic_vector( GP,ROMDATA_W ),
+       conv_std_logic_vector( EP+GP,ROMDATA_W ),
+       conv_std_logic_vector( DM,ROMDATA_W ),
+       conv_std_logic_vector( DM+EP,ROMDATA_W ),
+       conv_std_logic_vector( DM+GP,ROMDATA_W ),
+       conv_std_logic_vector( DM+GP+EP,ROMDATA_W ),
+       conv_std_logic_vector( FP,ROMDATA_W ),
+       conv_std_logic_vector( FP+EP,ROMDATA_W ),
+       conv_std_logic_vector( FP+GP,ROMDATA_W ),
+       conv_std_logic_vector( FP+GP+EP,ROMDATA_W ),
+       conv_std_logic_vector( FP+DM,ROMDATA_W ),
+       conv_std_logic_vector( FP+DM+EP,ROMDATA_W ),
+       conv_std_logic_vector( FP+DM+GP,ROMDATA_W ),
+       conv_std_logic_vector( FP+DM+GP+EP,ROMDATA_W ),
     
        (others => '0'),
-       std_logic_vector( DM ),
-       std_logic_vector( EP ),
-       std_logic_vector( EP+DM ),
-       std_logic_vector( FM ),
-       std_logic_vector( FM+DM ),
-       std_logic_vector( FM+EP ),
-       std_logic_vector( FM+EP+DM ),
-       std_logic_vector( GP ),
-       std_logic_vector( GP+DM ),
-       std_logic_vector( GP+EP ),
-       std_logic_vector( GP+EP+DM ),
-       std_logic_vector( GP+FM ),
-       std_logic_vector( GP+FM+DM ),
-       std_logic_vector( GP+FM+EP ),
-       std_logic_vector( GP+FM+EP+DM )
+       conv_std_logic_vector( DM,ROMDATA_W ),
+       conv_std_logic_vector( EP,ROMDATA_W ),
+       conv_std_logic_vector( EP+DM,ROMDATA_W ),
+       conv_std_logic_vector( FM,ROMDATA_W ),
+       conv_std_logic_vector( FM+DM,ROMDATA_W ),
+       conv_std_logic_vector( FM+EP,ROMDATA_W ),
+       conv_std_logic_vector( FM+EP+DM,ROMDATA_W ),
+       conv_std_logic_vector( GP,ROMDATA_W ),
+       conv_std_logic_vector( GP+DM,ROMDATA_W ),
+       conv_std_logic_vector( GP+EP,ROMDATA_W ),
+       conv_std_logic_vector( GP+EP+DM,ROMDATA_W ),
+       conv_std_logic_vector( GP+FM,ROMDATA_W ),
+       conv_std_logic_vector( GP+FM+DM,ROMDATA_W ),
+       conv_std_logic_vector( GP+FM+EP,ROMDATA_W ),
+       conv_std_logic_vector( GP+FM+EP+DM,ROMDATA_W )
        );
 
-  signal addr_reg : STD_LOGIC_VECTOR(ROMADDR_W-1 downto 0);
 begin   
-  
-  datao <= rom( TO_INTEGER(UNSIGNED(addr_reg)) ); 
-  
+    
   process(clk)
   begin
    if clk = '1' and clk'event then
-     addr_reg <= addr;
+	  datao <= rom( CONV_INTEGER(UNSIGNED(addr)) ); 
    end if;
   end process;
       
